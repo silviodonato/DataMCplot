@@ -1,21 +1,6 @@
 import ROOT
-
-## create the TH1F plot using tree.Draw function
-def getHistoUsingDraw(tree, histoOptions, isMC=True):
-    if isMC:
-        cuts_weight = "(%s)*(%s)"%(histoOptions.cutsMC,histoOptions.weightMC)
-    else:
-        cuts_weight = "(%s)"%(histoOptions.cutsData)
-    expr = "%s >> histo(%s,%s,%s)"%(histoOptions.var,str(histoOptions.nbins),str(histoOptions.xmin),str(histoOptions.xmax))
-    tree.Draw( expr, cuts_weight, histoOptions.opts)
-    histo = ROOT.gDirectory.Get("histo")
-    if type(histo)!=ROOT.TH1F:
-        ROOT.gDirectory.ls()
-        print tree.Draw("","")
-        assert(type(histo)==ROOT.TH1F)
-    histo.SetName(histoOptions.plotName)
-    
-    return histo
+from getHistoUsingDraw import getHisto
+### create the TH1F plot using tree.Draw function
 
 ## create the THStack plot using tree.Draw function
 def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoOptions):
@@ -31,7 +16,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
         if group.samples[0] in datasetMC:
             for sampleName in group.samples:
                 sample = datasetMC[sampleName]
-                tmp = getHistoUsingDraw(sample.tree, histoOptions)
+                tmp = getHisto(sample.tree, histoOptions, sampleName)
                 tmp.Scale(sample.singleEventWeight)
                 print sampleName+":",round(tmp.Integral(),1)
                 if firstSample:
@@ -49,7 +34,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
         elif group.samples[0] in datasetData:
             for sampleName in group.samples:
                 sample = datasetData[sampleName]
-                tmp = getHistoUsingDraw(sample.tree, histoOptions, isMC=False)
+                tmp = getHisto(sample.tree, histoOptions, sampleName, isMC=False)
                 print sampleName+":",round(tmp.Integral(),1)
                 if firstSample:
                     histo = tmp
@@ -65,7 +50,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
     
     stack.GetXaxis().SetTitle(histoOptions.xTitle)
     stack.GetYaxis().SetTitle(histoOptions.yTitle)
-    
+    signalPlot.SetMarkerColor(signalPlot.GetLineColor())
     return stack,dataPlot,signalPlot
 
 ## create the TLegend
