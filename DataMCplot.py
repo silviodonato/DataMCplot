@@ -7,6 +7,7 @@ from copy import *
 from array import array
 from config import histos,datasetMC,datasetData,groups,userFunctions
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
+import time
 
 for userFunction in userFunctions:
     ROOT.gROOT.LoadMacro(userFunction)
@@ -34,6 +35,7 @@ for group in groups:
             raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData."%(sample,group.latexName))
 
 for histoOptions in histos:
+    t0 = time.time()
     print 
     print histoOptions.var
     print 
@@ -52,8 +54,11 @@ for histoOptions in histos:
     if signalPlot:
         signalPlot.SetLineWidth(3)
         signalPlot.SetLineColor(ROOT.kBlue)
+        signalPlot.SetMarkerColor(ROOT.kBlue)
         signalPlot.SetFillStyle(0)
-        scaleOverlay = getOverlayScale(signalPlot,stack)
+#        scaleOverlay = getOverlayScale(signalPlot,stack)
+        scaleOverlay = getOverlayScale(signalPlot,dataPlot)
+#        scaleOverlay = getOverlayScale(signalPlot,stack)
         signalPlot.Scale(scaleOverlay)
         signalPlot.Draw("same")
         legend.AddEntry(signalPlot,"signal x %s"%str(scaleOverlay),"l")
@@ -61,4 +66,7 @@ for histoOptions in histos:
     os.system("mkdir -p %s"%histoOptions.folder)
     outputName = histoOptions.folder+"/"+histoOptions.plotName+".png"
     c1.SaveAs(outputName)
+    c1.SaveAs(outputName.replace(".png",".root"))
     print outputName+" saved"
+    print "Time consuming: ",round(time.time() - t0,1)," s."
+
