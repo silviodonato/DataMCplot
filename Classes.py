@@ -4,7 +4,6 @@ import copy
 class DatasetClass(object):
     def __init__(self, fileName):
         self.fileName = fileName
-        self.loadTree()
     def loadTree(self):
         self.tfile = ROOT.TFile(self.fileName)
         self.tree = self.tfile.Get("tree")
@@ -34,9 +33,14 @@ class GroupClass():
         self.color = color
         self.latexName = latexName
         self.samples = samples
+        for sample in samples:
+            if not hasattr(sample,"tree")
+                sample.loadTree()
+            else:
+                print "Check the group definition: you are using a sample two times!"
 
 class HistogramClass():
-    def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, xTitle="", yTitle="", plotName="", opts=""):
+    def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, treeVars=set(), xTitle="", yTitle="", plotName="", opts=""):
         self.var = var
         self.nbins = nbins
         self.xmin = xmin
@@ -49,28 +53,43 @@ class HistogramClass():
         self.xTitle = xTitle
         self.yTitle = yTitle
         self.opts = opts
-        self.setUnassignedParameters()
+        self.treeVars = treeVars
+        self.init()
         
-    def setUnassignedParameters(self):
-        if self.plotName=="":
-            self.plotName = filter(str.isalnum, self.var)
-        
+    def init(self):
         if self.xTitle == "": self.xTitle = self.var
-        
+        if self.plotName=="": self.plotName = filter(str.isalnum, self.xTitle)
         bin_size = 1.*(self.xmax-self.xmin)/self.nbins
-        if self.yTitle == "": 
-            self.yTitle = "Events/"+str(bin_size)
-        
-        if self.opts == "": 
-            self.opts = "HIST goff"
-        
+        if self.yTitle == "": self.yTitle = "Events/"+str(bin_size)
+        if self.opts == "": self.opts = "HIST goff"
+        if len(self.treeVars)>0:
+            self.treeVars.update(self.getUsedVariables(self.cutsMC))
+            self.treeVars.update(self.getUsedVariables(self.cutsData))
+            self.treeVars.update(self.getUsedVariables(self.weightMC))
+    
+    
     def clone(self,**args):
         new = copy.copy(self)
         new.xTitle=""
         new.yTitle=""
         new.plotName=""
         new.opts=""
+        new.treeVars=set()
         for arg in args:
             setattr(new,arg,args[arg])
-        new.setUnassignedParameters()
+        new.init()
         return new
+        
+    def getUsedVariables(self,cuts_weight):
+        cuts_weight = cuts_weight.replace("&", " ")
+        cuts_weight = cuts_weight.replace("*", " ")
+        cuts_weight = cuts_weight.replace("/", " ")
+        cuts_weight = cuts_weight.replace("+", " ")
+        cuts_weight = cuts_weight.replace("-", " ")
+        cuts_weight = cuts_weight.replace("|", " ")
+        cuts_weight = cuts_weight.replace("(", " ")
+        cuts_weight = cuts_weight.replace(")", " ")
+        cuts_weight = cuts_weight.replace(">", " ")
+        cuts_weight = cuts_weight.replace("<", " ")
+        return cuts_weight.split(" ")
+
