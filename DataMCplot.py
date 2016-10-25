@@ -1,3 +1,17 @@
+## load the config file
+print ""
+from optparse import OptionParser
+import os
+parser = OptionParser()
+parser.add_option("-c", "--config", dest="config", default="configs/config_default.py",
+                  help="set config file (default is config_default.py)") #, metavar="FILE"
+(options, args) = parser.parse_args()
+os.system("rm -f config.py config.pyc")
+os.system("ln "+options.config+" config.py")
+print "I'm using "+options.config+" as configuration."
+print ""
+
+## import libraries
 import TdrStyles
 import string
 import ROOT
@@ -8,19 +22,12 @@ from array import array
 from config import histos,datasetMC,datasetData,groups,userFunctions
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
 import time
-from optparse import OptionParser
 
-#parser = OptionParser()
-#parser.add_option("-c", "--config", dest="config", default="config.py"
-#                  help="config file") #, metavar="FILE"
-#(options, args) = parser.parse_args()
-
-#histos = importlib.import_module(options.config)
-#from config import histos,datasetMC,datasetData,groups,userFunctions
-
+## load ROOT functions
 for userFunction in userFunctions:
     ROOT.gROOT.LoadMacro(userFunction)
 
+## define a function to find the optimal overlay scale
 def getOverlayScale(signalPlot,stack):
     maxSig = signalPlot.GetMaximum()
     maxStack = stack.GetMaximum()
@@ -47,6 +54,7 @@ for mc in datasetMC.values():
     if hasattr(mc,"tree"):
         mc.setSingleEventWeight(totalLumi)
 
+## for each histograms plot the stack, data, signal overlay, legend and save the output
 for histoOptions in histos:
     t0 = time.time()
     print 
