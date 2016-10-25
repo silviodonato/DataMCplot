@@ -1,4 +1,4 @@
-userFunctions = [] #["CSVn.C"]
+userFunctions = ["functions.C"] #["CSVn.C"]
 
 import ROOT
 from Classes import DatasetMCClass,DatasetDataClass,GroupClass,HistogramClass
