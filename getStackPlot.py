@@ -1,5 +1,6 @@
 import ROOT
 from getHistoUsingDraw import getHisto
+from array import array
 ### create the TH1F plot using tree.Draw function
 
 ## create the THStack plot using tree.Draw function
@@ -18,7 +19,9 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                 sample = datasetMC[sampleName]
                 tmp = getHisto(sample.tree, histoOptions, sampleName)
                 tmp.Scale(sample.singleEventWeight)
-                print sampleName+":",round(tmp.Integral(),1)
+                doubleVariable = array('d',[0])
+                integral = tmp.IntegralAndError(0,tmp.GetNbinsX(),doubleVariable)
+                print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1)
                 if firstSample:
                     histo = tmp
                     histo.SetFillColor(group.color)
