@@ -5,6 +5,8 @@ class DatasetClass(object):
     def __init__(self, fileName):
         self.fileName = fileName
     def loadTree(self):
+        if hasattr(self,"tree"):
+            print "Check the group definition: you are using a sample two times!"
         self.tfile = ROOT.TFile(self.fileName)
         self.tree = self.tfile.Get("tree")
         print "Getting tree from ",self.fileName #," id=",id(self.tree)
@@ -16,7 +18,10 @@ class DatasetMCClass(DatasetClass):
     def __init__(self, xsec, fileName):
         DatasetClass.__init__(self, fileName)
         self.xsec = xsec
+    def loadTree(self):
+        DatasetClass.loadTree(self)
         self.count = self.getCount()
+        print self.fileName,self.count
     def getCount(self):
         return self.tfile.Get("CountWeighted").GetBinContent(1)
     def setSingleEventWeight(self,lumi):
@@ -33,11 +38,6 @@ class GroupClass():
         self.color = color
         self.latexName = latexName
         self.samples = samples
-        for sample in samples:
-            if not hasattr(sample,"tree")
-                sample.loadTree()
-            else:
-                print "Check the group definition: you are using a sample two times!"
 
 class HistogramClass():
     def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, treeVars=set(), xTitle="", yTitle="", plotName="", opts=""):

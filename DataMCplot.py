@@ -8,6 +8,15 @@ from array import array
 from config import histos,datasetMC,datasetData,groups,userFunctions
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
 import time
+from optparse import OptionParser
+
+#parser = OptionParser()
+#parser.add_option("-c", "--config", dest="config", default="config.py"
+#                  help="config file") #, metavar="FILE"
+#(options, args) = parser.parse_args()
+
+#histos = importlib.import_module(options.config)
+#from config import histos,datasetMC,datasetData,groups,userFunctions
 
 for userFunction in userFunctions:
     ROOT.gROOT.LoadMacro(userFunction)
@@ -19,20 +28,24 @@ def getOverlayScale(signalPlot,stack):
     scale = int(scale[0])*(10**len(scale))/10
     return int(scale)
 
-## Evaluate the total integrated luminosity in data
+## Check the definition of the groups and datasets, load the trees, and get the totalLumi
 totalLumi = 0
-for data in datasetData.values(): totalLumi += data.lumi
-
-## Evaluate the normalization to be applied to each simulated event
-for mc in datasetMC.values(): mc.setSingleEventWeight(totalLumi)
-
-## Check the definition of the groups and datasets
 for group in groups:
     if len(group.samples)==0:
         raise ValueError("Group %s contains zero samples. Please fix it."%group.latexName)
     for sample in group.samples:
-        if not (sample in datasetData or sample in datasetMC):
+        if sample in datasetData:
+            datasetData[sample].loadTree()
+            totalLumi += datasetData[sample].lumi
+        elif sample in datasetMC:
+            datasetMC[sample].loadTree()
+        else:
             raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData."%(sample,group.latexName))
+
+## Evaluate the normalization to be applied to each simulated event
+for mc in datasetMC.values(): 
+    if hasattr(mc,"tree"):
+        mc.setSingleEventWeight(totalLumi)
 
 for histoOptions in histos:
     t0 = time.time()
