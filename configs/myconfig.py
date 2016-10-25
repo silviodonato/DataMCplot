@@ -38,7 +38,8 @@ histos.append(histoTemplate.clone( var="jets_pt[5]" , nbins=100, xmin=0, xmax=10
 '''
 
 
-cut = "(HLT_BIT_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v || HLT_BIT_HLT_PFHT450_SixJet40_BTagCSV_p056_v) && (btag_LR_geq2b_leq1b_btagCSV>0.85) && (btag_LR_3b_2b_btagCSV>0.93) && qg_LR_3b_flavour_3q_0q>0"
+#cut = "(HLT_BIT_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v || HLT_BIT_HLT_PFHT450_SixJet40_BTagCSV_p056_v) && (btag_LR_geq2b_leq1b_btagCSV>0.85) && (btag_LR_3b_2b_btagCSV>0.93) && qg_LR_3b_flavour_3q_0q>0"
+cut = "(btag_LR_geq2b_leq1b_btagCSV>0.85) && (btag_LR_3b_2b_btagCSV>0.93) && qg_LR_3b_flavour_3q_0q>0"
 #triggerWeight = "(0.5+0.5*erf((jets_pt[5]-39.1116)/7.50695)+0.0618949) * (0.5+0.440825*erf((ht-448.58)/75.0045)-0.0455728)"
 triggerWeight = "1"
 
@@ -48,10 +49,10 @@ histoTemplate = HistogramClass(
     nbins = 20, 
     xmin = 0, 
     xmax = 1, 
-    folder = "triggerTurnOn", 
+    folder = "test", 
     weightMC = "puWeight*(1+4*(puWeightDown-puWeight)/puWeight) * 0.4 * btagWeightCSV " + "*" + triggerWeight, 
     cutsMC = cut, 
-    cutsData = cut,
+    cutsData = cut + "&&HLT_BIT_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v",
 #    xTitle="", 
 #    yTitle="", 
 #    plotName=""
@@ -88,8 +89,8 @@ def testFunction(tree):
     return mass_W
     return mass
 
-#histos.append(histoTemplate.clone( var="jets_pt[0]" , nbins=100, xmin=0, xmax=500))
-histos.append(histoTemplate.clone( var=testFunction , nbins=100, xmin=0, xmax=1000, xTitle="Wmass", treeVars={"jets_pt","jets_eta","jets_phi","jets_mass","jets_btagCSV","jets_mc*"}))
+histos.append(histoTemplate.clone( var="jets_pt[0]" , nbins=100, xmin=0, xmax=500))
+#histos.append(histoTemplate.clone( var=testFunction , nbins=100, xmin=0, xmax=1000, xTitle="Wmass", treeVars={"jets_pt","jets_eta","jets_phi","jets_mass","jets_btagCSV","jets_mc*"}))
 
 #histos.append(histoTemplate.clone( var="btag_LR_geq2b_leq1b_btagCSV" , nbins=100, xmin=0, xmax=1))
 #histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_5q_4q" ) )
@@ -178,34 +179,34 @@ datasetMC = {
         xsec = xsec["tth"],
         fileName = prefix+"ttHTobb_M125_13TeV_powheg_pythia8.root",
     ),
-#    "tthnobb" : DatasetMCClass(
-#        xsec = xsec["tthnobb"],
-#        fileName = prefix+"ttHTobb_M125_13TeV_powheg_pythia8.root",
-#    ),
-#    "qcd300" : DatasetMCClass(
-#        xsec = xsec["qcd300"],
-#        fileName = prefix+"QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
-#    ),
-#    "qcd500" : DatasetMCClass(
-#        xsec = xsec["qcd500"],
-#        fileName = prefix+"QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
-#    ),
-#    "qcd700" : DatasetMCClass(
-#        xsec = xsec["qcd700"],
-#        fileName = prefix+"QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
-#    ),
-#    "qcd1000" : DatasetMCClass(
-#        xsec = xsec["qcd1000"],
-#        fileName = prefix+"QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
-#    ),
-#    "qcd1500" : DatasetMCClass(
-#        xsec = xsec["qcd1500"],
-#        fileName = prefix+"QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
-#    ),
-#    "qcd2000" : DatasetMCClass(
-#        xsec = xsec["qcd2000"],
-#        fileName = prefix+"QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
-#    ),
+    "tthnobb" : DatasetMCClass(
+        xsec = xsec["tthnobb"],
+        fileName = prefix+"ttHTobb_M125_13TeV_powheg_pythia8.root",
+    ),
+    "qcd300" : DatasetMCClass(
+        xsec = xsec["qcd300"],
+        fileName = prefix+"QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
+    ),
+    "qcd500" : DatasetMCClass(
+        xsec = xsec["qcd500"],
+        fileName = prefix+"QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
+    ),
+    "qcd700" : DatasetMCClass(
+        xsec = xsec["qcd700"],
+        fileName = prefix+"QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
+    ),
+    "qcd1000" : DatasetMCClass(
+        xsec = xsec["qcd1000"],
+        fileName = prefix+"QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
+    ),
+    "qcd1500" : DatasetMCClass(
+        xsec = xsec["qcd1500"],
+        fileName = prefix+"QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
+    ),
+    "qcd2000" : DatasetMCClass(
+        xsec = xsec["qcd2000"],
+        fileName = prefix+"QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root",
+    ),
 }
 datasetData = {
     "JetHT" : DatasetDataClass(
@@ -215,21 +216,22 @@ datasetData = {
 }
 
 groups =[
-#    GroupClass(
-#        color = ROOT.kGreen,
-#        latexName = "QCD",
+    GroupClass(
+        color = ROOT.kGreen,
+        latexName = "QCD",
+        samples = ["qcd300","qcd500","qcd1000","qcd1500","qcd2000"]
 #        samples = ["qcd300","qcd500","qcd700","qcd1000","qcd1500","qcd2000"]
-#    ),
-#    GroupClass(
-#        color = ROOT.kRed,
-#        latexName = "t#bar{t}",
-#        samples = ["tt"]
-#    ),
+    ),
+    GroupClass(
+        color = ROOT.kRed,
+        latexName = "t#bar{t}",
+        samples = ["tt"]
+    ),
     GroupClass(
         color = ROOT.kBlue,
         latexName = "signal",
-        samples = ["tth"]
-#        samples = ["tth","tthnobb"]
+#        samples = ["tth"]
+        samples = ["tth","tthnobb"]
     ),
     GroupClass(
         color = ROOT.kBlack,
