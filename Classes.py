@@ -1,5 +1,6 @@
 import ROOT
 import copy
+import os.path 
 
 class DatasetClass(object):
     def __init__(self, fileName):
@@ -7,6 +8,7 @@ class DatasetClass(object):
     def loadTree(self):
         if hasattr(self,"tree"):
             print "Check the group definition: you are using a sample two times!"
+        if not os.path.isfile(self.fileName):  raise Exception("File %s does not exist."%self.fileName) 
         self.tfile = ROOT.TFile(self.fileName)
         self.tree = self.tfile.Get("tree")
         print "Getting tree from ",self.fileName #," id=",id(self.tree)
