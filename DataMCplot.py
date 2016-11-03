@@ -1,3 +1,4 @@
+#!/usr/bin/python
 ## load the config file
 print ""
 from optparse import OptionParser
