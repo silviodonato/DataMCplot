@@ -33,6 +33,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
             if group.latexName.lower() == "signal":
                 print "copy signal for overlay"
                 signalPlot = histo.Clone("Overlay")
+                signalPlot.SetMarkerColor(signalPlot.GetLineColor())
             leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
         elif group.samples[0] in datasetData:
             for sampleName in group.samples:
@@ -53,7 +54,6 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
     
     stack.GetXaxis().SetTitle(histoOptions.xTitle)
     stack.GetYaxis().SetTitle(histoOptions.yTitle)
-    signalPlot.SetMarkerColor(signalPlot.GetLineColor())
     return stack,dataPlot,signalPlot
 
 ## create the TLegend
