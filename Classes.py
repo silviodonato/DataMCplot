@@ -42,7 +42,7 @@ class GroupClass():
         self.samples = samples
 
 class HistogramClass():
-    def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, treeVars=set(), xTitle="", yTitle="", plotName="", opts=""):
+    def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False):
         self.var = var
         self.nbins = nbins
         self.xmin = xmin
@@ -56,6 +56,7 @@ class HistogramClass():
         self.yTitle = yTitle
         self.opts = opts
         self.treeVars = treeVars
+        self.normalized =normalized
         self.init()
         
     def init(self):
@@ -72,10 +73,11 @@ class HistogramClass():
     
     def clone(self,**args):
         new = copy.copy(self)
-        new.xTitle=""
-        new.yTitle=""
-        new.plotName=""
-        new.opts=""
+        if new.xTitle== new.var: new.xTitle=""
+        if new.plotName== filter(str.isalnum, new.xTitle): new.plotName=""
+        bin_size = 1.*(new.xmax-new.xmin)/new.nbins
+        if new.yTitle == "Events/"+str(bin_size): new.yTitle = ""
+        if new.opts == "HIST goff" : new.opts =""
         new.treeVars=set()
         for arg in args:
             setattr(new,arg,args[arg])
