@@ -3,11 +3,15 @@ from getHistoUsingDraw import getHisto
 from array import array
 ### create the TH1F plot using tree.Draw function
 
+doubleVariable = array('d',[0])
 ## create the THStack plot using tree.Draw function
 def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoOptions):
     dataset = {}
     dataset.update(datasetMC)
     dataset.update(datasetData)
+    totalMC = 0.
+    totalData = 0.
+    totalMC2_err = 0.
     dataPlot = None
     signalPlot = None
     stack = ROOT.THStack(histoOptions.plotName,'')
@@ -19,9 +23,10 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                 sample = datasetMC[sampleName]
                 tmp = getHisto(sample.tree, histoOptions, sampleName)
                 tmp.Scale(sample.singleEventWeight)
-                doubleVariable = array('d',[0])
                 integral = tmp.IntegralAndError(0,tmp.GetNbinsX(),doubleVariable)
                 print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1)
+                totalMC += integral
+                totalMC2_err += doubleVariable[0]**2
                 if firstSample:
                     histo = tmp
                     histo.SetFillColor(group.color)
@@ -47,8 +52,17 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                     histo.Add(tmp)
                 firstSample = False
             dataPlot=histo
+            totalData += dataPlot.Integral()
         else:
             raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData. The group and dataset checker does not work!"%(group.samples[0],group.latexName))
+    
+    print "Total MC:",round(totalMC,1)," +/- ",round((totalMC2_err**0.5),1)
+    print "Total Data:",round(totalData,1)
+    
+    if histoOptions.normalized:
+        ratio = totalData/totalMC
+        for histo in stack.GetHists():
+            histo.Scale(ratio)
     
     stack.Draw("goff")
     
