@@ -5,7 +5,13 @@ from optparse import OptionParser
 import os
 parser = OptionParser()
 parser.add_option("-c", "--config", dest="config", default="configs/config_default.py",
-                  help="set config file (default is config_default.py)") #, metavar="FILE"
+                  help="set config file (default is config_default.py)")
+parser.add_option("--gc",
+                  action="store_true", dest="forGC", default=False,
+                  help="to run with grid-control")
+parser.add_option("-b", "--batch",
+                  action="store_true", dest="batch", default=False,
+                  help="run in batch mode")
 (options, args) = parser.parse_args()
 os.system("rm -f config.py config.pyc")
 os.system("ln "+options.config+" config.py")
@@ -23,6 +29,22 @@ from array import array
 from config import histos,datasetMC,datasetData,groups,userFunctions
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
 import time
+
+## run in batch mode, if requested
+if options.batch:
+    ROOT.gROOT.SetBatch()
+
+## if it is a grid-control jobs, select which histos to run in this job
+if options.forGC:
+    config = os.environ['config']
+    histo_total = int(os.environ['histo_total'])
+    histo_i = int(os.environ['histo_i'])
+    
+    job_histos = []
+    for i in range(histo_total):
+        if (i+histo_i)%histo_total == 0:
+            job_histos.append(histos[i])
+    histos = job_histos
 
 ## load ROOT functions
 for userFunction in userFunctions:
