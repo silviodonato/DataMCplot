@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2.7
 ## load the config file
 print ""
 from optparse import OptionParser
@@ -21,6 +21,14 @@ if options.forGC:
     histo_total = int(os.environ['histo_total'])
     histo_i = int(os.environ['histo_i'])
     
+## load the proper "config" library#########
+import importlib
+config = importlib.import_module('configs.'+options.config.replace(".py",""))
+print "I'm using "+options.config+" as configuration in configs folder."
+print ""
+for el in ['histos','datasetMC','datasetData','groups','userFunctions']:
+    globals()[el]= getattr(config,el)
+
 ## import libraries
 import TdrStyles
 import string
@@ -35,13 +43,6 @@ import time
 ## run in batch mode, if requested
 if options.batch:
     ROOT.gROOT.SetBatch()
-
-## load the proper "config" library#########
-os.system("rm -f config.py config.pyc")
-os.system("ln "+options.config+" config.py")
-print "I'm using "+options.config+" as configuration."
-print ""
-from config import histos,datasetMC,datasetData,groups,userFunctions
 
 ## load ROOT functions
 for userFunction in userFunctions:
@@ -75,10 +76,12 @@ for mc in datasetMC.values():
         mc.setSingleEventWeight(totalLumi)
 
 ## if it is a grid-control job, select which histos to run in this job
+print len(histos)
+print len(config.histos)
 if options.forGC:
     job_histos = []
-    for i in range(histo_total):
-        if (i+histo_i)%histo_total == 0:
+    for i in range(len(histos)):
+        if (i-histo_i)%histo_total == 0:
             job_histos.append(histos[i])
     histos = job_histos
 

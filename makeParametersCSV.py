@@ -1,22 +1,37 @@
-#!/usr/bin/python
+#!/usr/bin/env python2.7
 import sys, os
+
+try:
+    import importlib
+except:
+    Exception(ValueError,"Please use python >2.7")
 
 njobs = 100
 f = open('parameters.csv', 'w')
 
+plots = []
 configs = sys.argv[1:]
-os.system("rm -f tempForCSV.py")
-os.system("ln "+configs[0]+" tempForCSV.py")
-import tempForCSV
 print "config;histo_total;histo_i"
 f.write("config;histo_total;histo_i\n")
 for config in configs:
-    os.system("rm -f tempForCSV.py")
-    os.system("ln "+config+" tempForCSV.py")
-    reload(tempForCSV)
+    tempForCSV = importlib.import_module('configs.'+config.replace(".py",""))
     counter = 0
     for histo in tempForCSV.histos:
-        print "%s;%s;%s\t%s"%(config,njobs,counter,histo.plotName)
+        print "%s;%s;%s"%(config,njobs,counter)
         f.write("%s;%s;%s\n"%(config,njobs,counter))
+        plots.append(histo.folder+"/"+histo.plotName+".png")
         counter+=1
+
+print
+print "-"*10
+print "List of plots"
+print "-"*10
+print
+
+check = set()
+for plot in plots:
+    if plot in check:
+        print "### This plot will be overwritten! ###"
+    print plot
+    check.add(plot)
 
