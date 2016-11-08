@@ -14,10 +14,6 @@ parser.add_option("-b", "--batch",
                   help="run in batch mode")
 (options, args) = parser.parse_args()
 
-## run in batch mode, if requested
-if options.batch:
-    ROOT.gROOT.SetBatch()
-
 ## if it is a grid-control job, load the environment variables
 if options.forGC:
     config = os.environ['config']
@@ -35,6 +31,10 @@ from copy import *
 from array import array
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
 import time
+
+## run in batch mode, if requested
+if options.batch:
+    ROOT.gROOT.SetBatch()
 
 ## load the proper "config" library#########
 os.system("rm -f config.py config.pyc")
