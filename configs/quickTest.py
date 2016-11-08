@@ -12,7 +12,7 @@ histoTemplate = HistogramClass(
     nbins = 1000, 
     xmin = 0, 
     xmax = 1000, 
-    folder = "preselection", 
+    folder = "quickTest", 
     weightMC = "1.*"+triggerWeight, 
     cutsMC = cut, 
     cutsData = cut + "&&(HLT_BIT_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v||HLT_BIT_HLT_PFHT450_SixJet40_BTagCSV_p056_v)",
@@ -32,6 +32,7 @@ histoTemplate.var = "nPVs"
 histoTemplate.weightMC = "puWeightICHEP(puWeight,puWeightDown) * "+triggerWeight 
 (histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax)  = (200, 0, 1)
 
+histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
 #histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))", xmin = 0, xmax = 1 ))
 #histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,3,Iteration$,Length$))", xmin = 0, xmax = 1 ))
@@ -39,7 +40,6 @@ histos.append(histoTemplate.clone( var="btag_LR_geq2b_leq1b_btagCSV", xmin = 0, 
 histos.append(histoTemplate.clone( var="btag_LR_4b_2b_btagCSV", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="btag_LR_3b_2b_btagCSV", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="btag_LR_4b_3b_btagCSV", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
 histos.append(histoTemplate.clone( var="Alt$(jets_pt[5],0)", xmin = 0, xmax = 100 ))
 histos.append(histoTemplate.clone( var="Alt$(jets_pt[6],0)", xmin = 0, xmax = 100 ))
 histos.append(histoTemplate.clone( var="Alt$(jets_pt[7],0)", xmin = 0, xmax = 100 ))
@@ -60,7 +60,7 @@ histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_3q_2q", xmin = 0, xmax 
 histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_4q_0q", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_4q_3q", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_5q_4q", xmin = 0, xmax = 1 ))
-
+'''
 histos.append(histoTemplate.clone())
 
 histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
@@ -143,6 +143,7 @@ histos.append(histoTemplate.clone())
 histoTemplate.var = "Sum$(CSVn(jets_qgl,3,Iteration$,Length$))"
 histoTemplate.plotName = "qgl4"
 histos.append(histoTemplate.clone())
+'''
 
 
 ## Define the datasets, ie. ROOT files with a cross-section (for MC) or integrated lumi (for data)
@@ -190,9 +191,9 @@ datasetMC = {
     ),
 }
 datasetData = {
-    "JetHT" : DatasetDataClass(
+    "SingleMuon" : DatasetDataClass(
         lumi = 12900*0.868310518,
-        fileName = prefix+"JetHT.root"
+        fileName = prefix+"SingleMuon.root"
     ),
 }
 
@@ -201,21 +202,11 @@ groups =[
     GroupClass(
         color = ROOT.kGreen,
         latexName = "QCD",
-        samples = ["qcd300","qcd500","qcd700","qcd1000","qcd1500","qcd2000"]
-    ),
-    GroupClass(
-        color = ROOT.kRed,
-        latexName = "t#bar{t}",
-        samples = ["tt"]
-    ),
-    GroupClass(
-        color = ROOT.kBlue,
-        latexName = "signal",
-        samples = ["tth","tthnobb"]
+        samples = ["qcd2000"]
     ),
     GroupClass(
         color = ROOT.kBlack,
         latexName = "Data",
-        samples = ["JetHT"]
+        samples = ["SingleMuon"]
     ),
 ]

@@ -30,7 +30,7 @@ histoTemplate.xTitle = ""
 histoTemplate.var = "nPVs"
 histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax  = 60, 0, 60
 histoTemplate.plotName = "nPVs_noWeights"
-'''
+
 histos.append(histoTemplate.clone())
 
 histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
@@ -113,7 +113,6 @@ histos.append(histoTemplate.clone())
 histoTemplate.var = "Sum$(CSVn(jets_qgl,3,Iteration$,Length$))"
 histoTemplate.plotName = "qgl4"
 histos.append(histoTemplate.clone())
-'''
 
 
 ## Define the datasets, ie. ROOT files with a cross-section (for MC) or integrated lumi (for data)

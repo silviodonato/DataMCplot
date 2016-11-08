@@ -37,25 +37,25 @@ histoTemplate = HistogramClass(
     cutsData = cut + dataPreselection,
     )
 
-#histos.append(histoTemplate.clone( var="jets_pt[3]", xmin = 0, xmax = 250 ))
+histos.append(histoTemplate.clone( var="jets_pt[3]", xmin = 0, xmax = 250 ))
 
-#histos.append(histoTemplate.clone( var="leps_pt[0]", xmin = 0, xmax = 200 ))
-#histos.append(histoTemplate.clone( var="transverseMass(met_pt, met_phi, leps_pt[0], leps_phi[0])", xmin = 0, xmax = 250 ))
-#histos.append(histoTemplate.clone( var="met_pt", xmin = 0, xmax = 250 ))
-#histos.append(histoTemplate.clone( var="nPVs", xmin = 0, xmax = 40 ))
-#histos.append(histoTemplate.clone( var="Max$(jets_btagCSV)", xmin = 0, xmax = 1 ))
+histos.append(histoTemplate.clone( var="leps_pt[0]", xmin = 0, xmax = 200 ))
+histos.append(histoTemplate.clone( var="transverseMass(met_pt, met_phi, leps_pt[0], leps_phi[0])", xmin = 0, xmax = 250 ))
+histos.append(histoTemplate.clone( var="met_pt", xmin = 0, xmax = 250 ))
+histos.append(histoTemplate.clone( var="nPVs", xmin = 0, xmax = 40 ))
+histos.append(histoTemplate.clone( var="Max$(jets_btagCSV)", xmin = 0, xmax = 1 ))
 
 histos.append(histoTemplate.clone( var="Max$(jets_btagCMVA)", xmin = -1, xmax = 1 ))
 histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCMVA,1,Iteration$,Length$))", nbins = 20, xmin = -1, xmax = 1 ))
 histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCMVA,2,Iteration$,Length$))", nbins = 20, xmin = -1, xmax = 1 ))
 
-#histos.append(histoTemplate.clone( var="Max$(jets_btagCSVNoHipMitigation)", xmin = 0, xmax = 1 ))
-#histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))", nbins = 20, xmin = 0, xmax = 1 ))
-#histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))", nbins = 20, xmin = 0, xmax = 1 ))
-#histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
-#histos.append(histoTemplate.clone( var="Alt$(jets_pt[5],0)", xmin = 0, xmax = 120 ))
-##histos.append(histoTemplate.clone( var="Wmass", xmin = 0, xmax = 250 ))
-##histos.append(histoTemplate.clone( var="met_pt", xmin = 0, xmax = 250 ))
+histos.append(histoTemplate.clone( var="Max$(jets_btagCSVNoHipMitigation)", xmin = 0, xmax = 1 ))
+histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))", nbins = 20, xmin = 0, xmax = 1 ))
+histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))", nbins = 20, xmin = 0, xmax = 1 ))
+histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
+histos.append(histoTemplate.clone( var="Alt$(jets_pt[5],0)", xmin = 0, xmax = 120 ))
+#histos.append(histoTemplate.clone( var="Wmass", xmin = 0, xmax = 250 ))
+#histos.append(histoTemplate.clone( var="met_pt", xmin = 0, xmax = 250 ))
 
 ## Define the datasets, ie. ROOT files with a cross-section (for MC) or integrated lumi (for data)
 br_h_to_bb = 0.577
