@@ -5,6 +5,7 @@ njobs = 100
 f = open('parameters.csv', 'w')
 
 configs = sys.argv[1:]
+os.system("rm -f tempForCSV.py")
 os.system("ln "+configs[0]+" tempForCSV.py")
 import tempForCSV
 print "config;histo_total;histo_i"
@@ -15,7 +16,7 @@ for config in configs:
     reload(tempForCSV)
     counter = 0
     for histo in tempForCSV.histos:
-        print "%s;%s;%s"%(config,njobs,counter)
+        print "%s;%s;%s\t%s"%(config,njobs,counter,histo.plotName)
         f.write("%s;%s;%s\n"%(config,njobs,counter))
         counter+=1
 
