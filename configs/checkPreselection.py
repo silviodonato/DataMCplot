@@ -5,11 +5,11 @@ from Classes import DatasetMCClass,DatasetDataClass,GroupClass,HistogramClass
 userFunctions = ["functions.C"]
 
 ## Define the histograms to be plotted
-cut = "Alt$(jets_pt[5],0)>60 && ht>500"
+cut = "Alt$(jets_pt[5],0)>40 && ht>550 && Sum$(jets_btagCSV>0.800)>=3"
 triggerWeight = "triggerCSV450_or_CSV400(ht, Sum$(jets_pt*(jets_pt>40)), Alt$(jets_pt[5],0), Max$(jets_btagCSV), Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$)))"
 histoTemplate = HistogramClass(
     var = "jets_pt[0]",
-    nbins = 1000, 
+    nbins = 50, 
     xmin = 0, 
     xmax = 1000, 
     folder = "preselection", 
@@ -22,128 +22,44 @@ histoTemplate = HistogramClass(
 
 histos = []
 
-
-
 ###################################################
 histoTemplate.weightMC = "1. *"+triggerWeight 
 histoTemplate.xTitle = ""
 histoTemplate.plotName = ""
 histoTemplate.var = "nPVs"
 histoTemplate.weightMC = "puWeightICHEP(puWeight,puWeightDown) * "+triggerWeight 
-(histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax)  = (200, 0, 1)
 
-#histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))", xmin = 0, xmax = 1 ))
-#histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,3,Iteration$,Length$))", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="btag_LR_geq2b_leq1b_btagCSV", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="btag_LR_4b_2b_btagCSV", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="btag_LR_3b_2b_btagCSV", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="btag_LR_4b_3b_btagCSV", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
-histos.append(histoTemplate.clone( var="Alt$(jets_pt[5],0)", xmin = 0, xmax = 100 ))
-histos.append(histoTemplate.clone( var="Alt$(jets_pt[6],0)", xmin = 0, xmax = 100 ))
-histos.append(histoTemplate.clone( var="Alt$(jets_pt[7],0)", xmin = 0, xmax = 100 ))
-histos.append(histoTemplate.clone( var="Alt$(jets_pt[8],0)", xmin = 0, xmax = 100 ))
+histos += [
+    histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,3,Iteration$,Length$))", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="btag_LR_geq2b_leq1b_btagCSV", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="btag_LR_4b_2b_btagCSV", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="btag_LR_3b_2b_btagCSV", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="btag_LR_4b_3b_btagCSV", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ),
+    histoTemplate.clone( var="Alt$(jets_pt[5],0)", xmin = 0, xmax = 100 ),
+    histoTemplate.clone( var="Alt$(jets_pt[6],0)", xmin = 0, xmax = 100 ),
+    histoTemplate.clone( var="Alt$(jets_pt[7],0)", xmin = 0, xmax = 100 ),
+    histoTemplate.clone( var="Alt$(jets_pt[8],0)", xmin = 0, xmax = 100 ),
+]
 
 histoTemplate.weightMC = "puWeightICHEP(puWeight,puWeightDown) * Sum$(product(qg_sf(jets_qgl, jets_mcFlavour),Iteration$,Length$)) * "+triggerWeight 
 
-histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_qgl,2,Iteration$,Length$))", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_qgl,3,Iteration$,Length$))", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_qgl,4,Iteration$,Length$))", xmin = 0, xmax = 1 ))
+histos += [
+    histoTemplate.clone( var="Sum$(CSVn(jets_qgl,2,Iteration$,Length$))", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="Sum$(CSVn(jets_qgl,3,Iteration$,Length$))", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="Sum$(CSVn(jets_qgl,4,Iteration$,Length$))", xmin = 0, xmax = 1 ),
 
-histos.append(histoTemplate.clone( var="qg_LR_4b_flavour_3q_0q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_4b_flavour_3q_2q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_4b_flavour_4q_0q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_4b_flavour_4q_4q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_3q_0q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_3q_2q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_4q_0q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_4q_3q", xmin = 0, xmax = 1 ))
-histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_5q_4q", xmin = 0, xmax = 1 ))
-
-histos.append(histoTemplate.clone())
-
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
-histoTemplate.plotName = "nPVs"
-histos.append(histoTemplate.clone())
-
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
-histoTemplate.var = "ht"
-histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax  = 200, 0, 2000
-histoTemplate.plotName = "ht_noWeights"
-histos.append(histoTemplate.clone())
-
-triggerWeight = "0.190696 * trigger400(ht,Alt$(jets_pt[5],0))"
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
-histoTemplate.var = "ht"
-histoTemplate.plotName = "ht"
-histos.append(histoTemplate.clone())
-
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
-histoTemplate.var = "Max$(jets_btagCSV)"
-histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax  = 200, 0, 1
-histoTemplate.plotName = "csv1_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))"
-histoTemplate.plotName = "csv2_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))"
-histoTemplate.plotName = "csv3_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_btagCSV,3,Iteration$,Length$))"
-histoTemplate.plotName = "csv4_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) * btagWeightCSV * "+triggerWeight 
-histoTemplate.var = "Max$(jets_btagCSV)"
-histoTemplate.plotName = "csv1"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))"
-histoTemplate.plotName = "csv2"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))"
-histoTemplate.plotName = "csv3"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_btagCSV,3,Iteration$,Length$))"
-histoTemplate.plotName = "csv4"
-histos.append(histoTemplate.clone())
-
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
-(histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax)  = (200, 0, 1)
-
-histoTemplate.var = "Sum$(CSVn(jets_qgl,1,Iteration$,Length$))"
-histoTemplate.plotName = "qgl2_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_qgl,2,Iteration$,Length$))"
-histoTemplate.plotName = "qgl3_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_qgl,3,Iteration$,Length$))"
-histoTemplate.plotName = "qgl4_noWeight"
-histos.append(histoTemplate.clone())
-
-histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) * Sum$(product(qg_sf(jets_qgl, jets_mcFlavour),Iteration$,Length$)) * "+triggerWeight 
-(histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax)  = (200, 0, 1)
-
-histoTemplate.var = "Sum$(CSVn(jets_qgl,1,Iteration$,Length$))"
-histoTemplate.plotName = "qgl2"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_qgl,2,Iteration$,Length$))"
-histoTemplate.plotName = "qgl3"
-histos.append(histoTemplate.clone())
-
-histoTemplate.var = "Sum$(CSVn(jets_qgl,3,Iteration$,Length$))"
-histoTemplate.plotName = "qgl4"
-histos.append(histoTemplate.clone())
-
+    histoTemplate.clone( var="qg_LR_4b_flavour_3q_0q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_4b_flavour_3q_2q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_4b_flavour_4q_0q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_4b_flavour_4q_4q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_3b_flavour_3q_0q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_3b_flavour_3q_2q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_3b_flavour_4q_0q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_3b_flavour_4q_3q", xmin = 0, xmax = 1 ),
+    histoTemplate.clone( var="qg_LR_3b_flavour_5q_4q", xmin = 0, xmax = 1 ),
+]
 
 ## Define the datasets, ie. ROOT files with a cross-section (for MC) or integrated lumi (for data)
 br_h_to_bb = 0.577

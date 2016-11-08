@@ -42,8 +42,7 @@ histoTemplate.cutsMC = cut
 histoTemplate.cutsData = cut + "&&HLT_BIT_HLT_PFHT400_SixJet30_v ",
 triggerWeight = "0.190696"
 histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
-histoTemplate.plotName = "normalization" 
-histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
+histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 , plotName = "normalization" ))
 
 ###################################################
 histoTemplate.plotName = "" 
