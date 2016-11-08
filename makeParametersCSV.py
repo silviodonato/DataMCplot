@@ -9,7 +9,7 @@ os.system("rm -f tempForCSV.py")
 os.system("ln "+configs[0]+" tempForCSV.py")
 import tempForCSV
 print "config;histo_total;histo_i"
-f.write("config;histo_total;histo_i")
+f.write("config;histo_total;histo_i\n")
 for config in configs:
     os.system("rm -f tempForCSV.py")
     os.system("ln "+config+" tempForCSV.py")

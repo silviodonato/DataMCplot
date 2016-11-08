@@ -13,11 +13,18 @@ parser.add_option("-b", "--batch",
                   action="store_true", dest="batch", default=False,
                   help="run in batch mode")
 (options, args) = parser.parse_args()
-os.system("rm -f config.py config.pyc")
-os.system("ln "+options.config+" config.py")
-print "I'm using "+options.config+" as configuration."
-print ""
 
+## run in batch mode, if requested
+if options.batch:
+    ROOT.gROOT.SetBatch()
+
+## if it is a grid-control job, load the environment variables
+if options.forGC:
+    config = os.environ['config']
+    options.config = config
+    histo_total = int(os.environ['histo_total'])
+    histo_i = int(os.environ['histo_i'])
+    
 ## import libraries
 import TdrStyles
 import string
@@ -26,25 +33,15 @@ import os
 from math import *
 from copy import *
 from array import array
-from config import histos,datasetMC,datasetData,groups,userFunctions
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
 import time
 
-## run in batch mode, if requested
-if options.batch:
-    ROOT.gROOT.SetBatch()
-
-## if it is a grid-control jobs, select which histos to run in this job
-if options.forGC:
-    config = os.environ['config']
-    histo_total = int(os.environ['histo_total'])
-    histo_i = int(os.environ['histo_i'])
-    
-    job_histos = []
-    for i in range(histo_total):
-        if (i+histo_i)%histo_total == 0:
-            job_histos.append(histos[i])
-    histos = job_histos
+## load the proper "config" library#########
+os.system("rm -f config.py config.pyc")
+os.system("ln "+options.config+" config.py")
+print "I'm using "+options.config+" as configuration."
+print ""
+from config import histos,datasetMC,datasetData,groups,userFunctions
 
 ## load ROOT functions
 for userFunction in userFunctions:
@@ -76,6 +73,14 @@ for group in groups:
 for mc in datasetMC.values(): 
     if hasattr(mc,"tree"):
         mc.setSingleEventWeight(totalLumi)
+
+## if it is a grid-control job, select which histos to run in this job
+if options.forGC:
+    job_histos = []
+    for i in range(histo_total):
+        if (i+histo_i)%histo_total == 0:
+            job_histos.append(histos[i])
+    histos = job_histos
 
 ## for each histograms plot the stack, data, signal overlay, legend and save the output
 for histoOptions in histos:
