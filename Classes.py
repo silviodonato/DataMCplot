@@ -73,11 +73,17 @@ class HistogramClass():
     
     def clone(self,**args):
         new = copy.copy(self)
-        if new.xTitle== new.var: new.xTitle=""
+        new.xTitle=""
+	new.plotName=""
+	new.yTitle = ""
+	new.opts =""
+	'''
+	if new.xTitle== new.var: new.xTitle=""
         if new.plotName== filter(str.isalnum, new.xTitle): new.plotName=""
         bin_size = 1.*(new.xmax-new.xmin)/new.nbins
         if new.yTitle == "Events/"+str(bin_size): new.yTitle = ""
         if new.opts == "HIST goff" : new.opts =""
+	'''
         new.treeVars=set()
         for arg in args:
             setattr(new,arg,args[arg])
