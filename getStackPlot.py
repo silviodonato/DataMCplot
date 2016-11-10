@@ -76,7 +76,42 @@ def createLegend():
     leg.SetLineWidth(2)
     leg.SetBorderSize(0)
     leg.SetFillColor(0)
-    leg.SetFillStyle(4000)
+    leg.SetFillStyle(0)
     leg.SetTextFont(62)
     leg.SetTextSize(0.035)
     return leg
+
+## evaluate the ratio
+def getRatio(data, stack, padSizeRatio):
+    background = stack.GetStack().Last()
+    backgroundNoError = background.Clone("backgroundNoError")
+    for i in range(backgroundNoError.GetNbinsX()):
+        backgroundNoError.SetBinError(i,0)
+    ratio = data.Clone("ratio")
+    ratio.Reset()
+    
+    ratio.GetYaxis().SetLabelSize(padSizeRatio*stack.GetYaxis().GetLabelSize())
+    ratio.GetXaxis().SetLabelSize(padSizeRatio*data.GetXaxis().GetLabelSize())
+    ratio.GetYaxis().SetTitleSize(padSizeRatio*stack.GetYaxis().GetTitleSize())
+    ratio.GetXaxis().SetTitleSize(padSizeRatio*data.GetXaxis().GetTitleSize())
+    ratio.GetYaxis().SetTitleOffset(1./padSizeRatio*stack.GetYaxis().GetTitleOffset())
+    ratio.GetXaxis().SetTitleOffset(1./stack.GetXaxis().GetTitleOffset())
+    ratio.GetYaxis().SetTitle("Data/MC")    
+    ratio.GetXaxis().SetTitle(stack.GetXaxis().GetTitle())    
+    ratio.GetYaxis().SetNdivisions(805)
+    
+    ratioMC = ratio.Clone("ratioMC")
+    ratio.Divide(data,backgroundNoError)
+    ratioMC.Divide(background,backgroundNoError)
+    
+    ratioMC.SetMarkerSize(0)
+    for i in range(ratioMC.GetNbinsX()):
+        x = ratioMC.GetBinContent(i)
+        if x!=1:
+            ratioMC.SetBinContent(i,1.)
+            ratioMC.SetBinError(i,10.)
+    
+    ratioMC.SetFillStyle(3001)
+    ratioMC.SetFillColor(ROOT.kGray)
+        
+    return ratio, ratioMC

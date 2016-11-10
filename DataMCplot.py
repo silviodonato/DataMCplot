@@ -37,7 +37,7 @@ import os
 from math import *
 from copy import *
 from array import array
-from getStackPlot import getStackWithDataOverlayAndLegend,createLegend
+from getStackPlot import getStackWithDataOverlayAndLegend,createLegend,getRatio
 import time
 
 ## run in batch mode, if requested
@@ -87,17 +87,38 @@ if options.forGC:
 
 ## for each histograms plot the stack, data, signal overlay, legend and save the output
 for histoOptions in histos:
+    yPadSeparation = 0.25
     t0 = time.time()
     print 
     print histoOptions.var
     print 
     TdrStyles.tdrStyle()
     legend = createLegend()
+    c2 = ROOT.TCanvas("c2","",1280,1024)
+    c2.Draw()
+    padPlot = ROOT.TPad("padPlot","",0.,yPadSeparation,1.,1.)
+    padPlot.SetBottomMargin(.02)
+    padRatio = ROOT.TPad("padRatio","",0.,0.,1.,yPadSeparation)
+    padRatio.SetTopMargin(0)
+    padRatio.SetBottomMargin(.09/yPadSeparation)
+    padRatio.Draw()
+    padPlot.Draw()
+    padRatio.SetGridx()
+    padRatio.SetGridy()
+    padPlot.SetGridx()
+    padPlot.SetGridy()
+    padPlot.cd()
+    
     stack,dataPlot,signalPlot = getStackWithDataOverlayAndLegend(legend,datasetMC,datasetData, groups, histoOptions)
+    padSizeRatio = (padPlot.GetWh()*padPlot.GetAbsHNDC())/(padRatio.GetWh()*padRatio.GetAbsHNDC())
 
-    c1 = ROOT.TCanvas("c1","",1280,720)
+    stack.GetHistogram().GetXaxis().SetTickLength(0)
+    stack.GetHistogram().GetXaxis().SetLabelSize(0)
+    stack.GetHistogram().GetXaxis().SetTitleSize(0)
+
     stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.3)
     stack.Draw("HIST")
+    print stack.GetXaxis().GetLabelSize()
     if dataPlot:
         dataPlot.SetMarkerStyle(20) 
         dataPlot.SetMarkerSize(1.2)
@@ -108,17 +129,27 @@ for histoOptions in histos:
         signalPlot.SetLineColor(ROOT.kBlue)
         signalPlot.SetMarkerColor(ROOT.kBlue)
         signalPlot.SetFillStyle(0)
-#        scaleOverlay = getOverlayScale(signalPlot,stack)
         scaleOverlay = getOverlayScale(signalPlot,dataPlot)
-#        scaleOverlay = getOverlayScale(signalPlot,stack)
         signalPlot.Scale(scaleOverlay)
         signalPlot.Draw("same")
         legend.AddEntry(signalPlot,"signal x %s"%str(scaleOverlay),"l")
+    
     legend.Draw()
+    
+    padRatio.cd()
+    
+    ratio,mcError = getRatio(dataPlot,stack,padSizeRatio)
+    print stack.GetXaxis().GetLabelSize()
+    print dataPlot.GetXaxis().GetLabelSize()
+    mcError.SetMaximum(1.499)
+    mcError.SetMinimum(0.501)
+    mcError.Draw("E3")
+    ratio.Draw("E1,same")
+    
     os.system("mkdir -p %s"%histoOptions.folder)
     outputName = histoOptions.folder+"/"+histoOptions.plotName+".png"
-    c1.SaveAs(outputName)
-    c1.SaveAs(outputName.replace(".png",".root"))
+    c2.SaveAs(outputName)
+    c2.SaveAs(outputName.replace(".png",".root"))
     print outputName+" saved"
     print "Time consuming: ",round(time.time() - t0,1)," s."
 
