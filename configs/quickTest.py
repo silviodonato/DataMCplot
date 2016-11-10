@@ -33,6 +33,7 @@ histoTemplate.weightMC = "puWeightICHEP(puWeight,puWeightDown) * "+triggerWeight
 (histoTemplate.nbins, histoTemplate.xmin, histoTemplate.xmax)  = (200, 0, 1)
 
 histos.append(histoTemplate.clone( var="ht", xmin = 0, xmax = 2000 ))
+'''
 #histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,1,Iteration$,Length$))", xmin = 0, xmax = 1 ))
 #histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,2,Iteration$,Length$))", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="Sum$(CSVn(jets_btagCSV,3,Iteration$,Length$))", xmin = 0, xmax = 1 ))
@@ -60,7 +61,6 @@ histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_3q_2q", xmin = 0, xmax 
 histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_4q_0q", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_4q_3q", xmin = 0, xmax = 1 ))
 histos.append(histoTemplate.clone( var="qg_LR_3b_flavour_5q_4q", xmin = 0, xmax = 1 ))
-'''
 histos.append(histoTemplate.clone())
 
 histoTemplate.weightMC = "puWeightICHEP400(puWeight,puWeightDown) *"+triggerWeight 
@@ -202,7 +202,7 @@ groups =[
     GroupClass(
         color = ROOT.kGreen,
         latexName = "QCD",
-        samples = ["qcd2000"]
+        samples = ["qcd300"]
     ),
     GroupClass(
         color = ROOT.kBlack,
