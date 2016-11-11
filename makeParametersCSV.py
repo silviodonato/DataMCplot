@@ -14,7 +14,9 @@ configs = sys.argv[1:]
 print "config;histo_total;histo_i"
 f.write("config;histo_total;histo_i\n")
 for config in configs:
-    tempForCSV = importlib.import_module('configs.'+config.replace(".py",""))
+    configName = config.replace("configs/","")
+    configName = configName.replace(".py","")
+    tempForCSV = importlib.import_module('configs.'+configName)
     counter = 0
     for histo in tempForCSV.histos:
         print "%s;%s;%s"%(config,njobs,counter)

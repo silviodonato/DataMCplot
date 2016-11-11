@@ -23,9 +23,10 @@ if options.forGC:
     
 ## load the proper "config" library#########
 import importlib
-config = importlib.import_module('configs.'+options.config.replace(".py",""))
 print "I'm using "+options.config+" as configuration in configs folder."
 print ""
+options.config = options.config.replace("configs/","")
+config = importlib.import_module('configs.'+options.config.replace(".py",""))
 for el in ['histos','datasetMC','datasetData','groups','userFunctions']:
     globals()[el]= getattr(config,el)
 
