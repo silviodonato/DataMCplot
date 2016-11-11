@@ -23,7 +23,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                 sample = datasetMC[sampleName]
                 tmp = getHisto(sample.tree, histoOptions, sampleName)
                 tmp.Scale(sample.singleEventWeight)
-                integral = tmp.IntegralAndError(0,tmp.GetNbinsX(),doubleVariable)
+                integral = tmp.IntegralAndError(1,tmp.GetNbinsX(),doubleVariable)
                 print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1)
                 totalMC += integral
                 totalMC2_err += doubleVariable[0]**2
