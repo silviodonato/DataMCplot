@@ -4,13 +4,16 @@
 #include "TLorentzVector.h"
 
 std::vector<float> pts;
+std::vector<TLorentzVector> parts;
 
 float prod;
+const float mW = 80.385;
+const float mW2 = 80.385*80.385;
 
 TLorentzVector part1;
 TLorentzVector part2;
 
-float CSVn(float csv, int n, int iteration, int length){
+float CSVn(float csv, unsigned int n, int iteration, int length){
     using namespace std;
     float value = 0;
     if(iteration==0){
@@ -372,11 +375,256 @@ float product(float x, int iteration, int length){
     }
 }
 
-float transverseMass(float pt1, float phi1, float pt2, float phi2){
-    part1.SetPtEtaPhiM(pt1,0,phi1,0);
-    part2.SetPtEtaPhiM(pt2,0,phi2,0);
-    return (part1+part2).M();
+float hadronicTopMass(float pt, float eta, float phi, float mass, float csv, int iteration, int length){
+    using namespace std;
+    float value = -1;
+    if(iteration==0){
+        pts.clear();
+        parts.clear();
+    }
+    TLorentzVector p;
+    p.SetPtEtaPhiM(pt,eta,phi,mass);
+    pts.push_back(csv);
+    parts.push_back(p);
+    if (iteration==length-1){
+        unsigned int csv1_i = -1;
+        unsigned int csv2_i = -1;
+        float csv1 = -30;
+        float csv2 = -30;
+        float csv;
+        for(unsigned int i=0; i<pts.size();i++){
+            csv = pts[i];
+            if(csv>csv1){
+                csv2=csv1;
+                csv2_i=csv1_i;
+                csv1=csv;
+                csv1_i=i;
+            }
+            else if (csv>csv2){
+                csv2=csv;
+                csv2_i=i;
+            }
+        }
+        TLorentzVector top1, top2;
+        int count1=0;
+        int count2=0;
+        for(unsigned int i=0; i<parts.size();i++){
+            if(i!=csv1_i && count1<3){
+                top1 +=parts[i];
+                count1++;
+            }
+            if(i!=csv2_i && count2<3){
+                top2 +=parts[i];
+                count2++;
+            }
+        }
+        
+        float massTop1 = top1.M();
+        float massTop2 = top2.M();
+        
+        if(fabs(massTop1-170)<fabs(massTop2-170)) value = massTop1;
+        else value = massTop2;
+    }
+    return value;
 }
+
+
+/*
+    See AN2011-171
+    X = mW^2/2 + lep_px*met_py + lep_px*met_py
+    a = lep_pz^2 - lep_E^2
+    b = 2*X*lep_pz
+    c = X^2 - lep_E^2*met_px^2 - lep_E^2*met_py^2
+    
+    met_pz = (-b +/- sqrt(b^2 - 4ac))/2a
+*/
+void etaNeutrino(float lep_pt, float lep_eta, float lep_phi, float& met_pt, float met_phi, float& met_eta_p,  float& met_eta_m,  float& mT2){
+    float lep_pz = TMath::SinH(lep_eta) * lep_pt;
+    float lep_px = TMath::Cos(lep_phi) * lep_pt;
+    float lep_py = TMath::Sin(lep_phi) * lep_pt;
+    float lep_E  = TMath::CosH(lep_eta) * lep_pt;
+    
+    float met_px = TMath::Cos(met_phi) * met_pt;
+    float met_py = TMath::Sin(met_phi) * met_pt;
+
+    mT2 = pow(met_pt+lep_pt,2) - pow(met_px+lep_px,2) - pow(met_py+lep_py,2);
+    if(mT2>mW2) {
+        met_eta_p = lep_eta;
+        met_eta_m = lep_eta;
+        // Ev = mW/(El*(1-cos(theta)))
+        float met_E = mW / ( lep_E * ( 1. - TMath::Cos(TVector2::Phi_mpi_pi(met_phi-lep_phi)) ) );
+        met_pt = met_E / TMath::CosH(met_eta_p);
+        met_pt = mW2 / ( 2 * lep_pt * ( 1. - TMath::Cos(TVector2::Phi_mpi_pi(met_phi-lep_phi)) ) );
+    }
+    else{
+        float X = mW2/2 + lep_px*met_px + lep_py*met_py;
+
+        float a = pow(lep_pz,2) - pow(lep_E,2);
+        float b = 2*X*lep_pz;
+        float c = pow(X,2) - pow(lep_E,2)*pow(met_px,2) - pow(lep_E,2)*pow(met_py,2);
+
+        float delta = pow(b*b - 4*a*c,0.5);
+
+        float met_pz_p = (-b + delta)/(2*a);
+        float met_pz_m = (-b - delta)/(2*a);
+        
+        met_eta_p = TMath::ASinH(met_pz_p/met_pt);
+        met_eta_m = TMath::ASinH(met_pz_m/met_pt);
+
+//        cout << "lep_pz,x,y,E" << endl; 
+//        cout << lep_pz << endl; 
+//        cout << lep_px << endl; 
+//        cout << lep_py << endl; 
+//        cout << lep_E << endl; 
+
+//        cout << "met px,y" << endl; 
+//        cout << met_px << endl; 
+//        cout << met_py << endl; 
+
+//        cout << "..." << endl; 
+//        cout << X << endl; 
+//        cout << a << endl; 
+//        cout << b << endl; 
+//        cout << c << endl; 
+//        cout << delta << endl; 
+//        cout << "met_pz_p" << endl; 
+//        cout << met_pz_p << endl; 
+//        cout << met_pz_m << endl; 
+
+//        cout << "met_eta_p" << endl; 
+//        cout << met_eta_p << endl; 
+//        cout << met_eta_m << endl; 
+
+//        cout << "lep_E" << endl; 
+//        cout << pow(pow(lep_px,2) + pow(lep_py,2) + pow(lep_pz,2),0.5) << endl; 
+//        cout << lep_E << endl; 
+//        
+//        cout << "mT" << endl; 
+//        cout << mT << endl; 
+
+//        TLorentzVector lep, neut;
+//        lep.SetPtEtaPhiM(lep_pt,lep_eta,lep_phi,0);
+//        neut.SetPtEtaPhiM(met_pt,met_eta_m,met_phi,0);
+//        float m1 = (lep+neut).M();
+//        neut.SetPtEtaPhiM(met_pt,met_eta_p,met_phi,0);
+//        float m2 = (lep+neut).M();
+
+//        cout << "mW" << endl; 
+//        cout << m1 << endl; 
+//        cout << m2 << endl; 
+
+    }
+    
+    return;
+}
+
+
+float leptonicTopMass(float jet_pt, float jet_eta, float jet_phi, float jet_mass, float jet_csv, float lep_pt, float lep_phi, float lep_eta, float met_pt, float met_phi, int iteration, int length){
+    using namespace std;
+    float value = 0;
+    if(iteration==0){
+        pts.clear();
+        parts.clear();
+    }
+    TLorentzVector jet;
+    jet.SetPtEtaPhiM(jet_pt,jet_eta,jet_phi,jet_mass);
+    pts.push_back(jet_csv);
+    parts.push_back(jet);
+    if (iteration==length-1){
+        int csv1_i = -1;
+        int csv2_i = -1;
+        float csv1 = -30;
+        float csv2 = -30;
+        float csv;
+        for(unsigned int i=0; i<pts.size();i++){
+            csv = pts[i];
+            if(csv>csv1){
+                csv2=csv1;
+                csv2_i=csv1_i;
+                csv1=csv;
+                csv1_i=i;
+            }
+            else if (csv>csv2){
+                csv2=csv;
+                csv2_i=i;
+            }
+        }
+//        TLorentzVector top1, top2;
+//        int count1=0;
+//        int count2=0;
+//        for(unsigned int i=0; i<parts.size();i++){
+//            if(i!=csv1_i && count1<3){
+//                top1 +=parts[i];
+//                count1++;
+//            }
+//            if(i!=csv2_i && count2<3){
+//                top2 +=parts[i];
+//                count2++;
+//            }
+//        }
+//        
+//        float massTop1 = top1.M();
+//        float massTop2 = top2.M();
+//        
+//        if(fabs(massTop1-170)<fabs(massTop2-170)) value = massTop1;
+//        else value = massTop2;
+        float met_eta_p;  
+        float met_eta_m;
+        float transverseMass2;
+        etaNeutrino(lep_pt, lep_eta, lep_phi, met_pt, met_phi, met_eta_p, met_eta_m, transverseMass2);
+        TLorentzVector lep, neut1, neut2, W1, W2, bjet1, bjet2;
+        if(csv1_i>=0) bjet1 = parts[csv1_i];
+        if(csv2_i>=0) bjet2 = parts[csv2_i];
+        lep.SetPtEtaPhiM(lep_pt,lep_eta,lep_phi,0);
+        neut1.SetPtEtaPhiM(met_pt,met_eta_m,met_phi,0);
+        W1 = lep+neut1;
+        neut2.SetPtEtaPhiM(met_pt,met_eta_p,met_phi,0);
+        W2 = lep+neut2;
+
+        float m11 = (bjet1+W1).M();
+        float m12 = (bjet1+W2).M();
+        float m21 = (bjet2+W1).M();
+        float m22 = (bjet2+W2).M();
+        
+        value = min(min(m11,m12),min(m21,m22));
+
+        pts.clear();
+        parts.clear();
+
+//        if(transverseMass2<mW2) value=0;
+//        value = pow(transverseMass2,0.5);
+        
+//        cout << "lep Px,Py,Pz,E" << endl; 
+//        cout << lep.Px() << endl; 
+//        cout << lep.Py() << endl; 
+//        cout << lep.Pz() << endl; 
+//        cout << lep.E() << endl; 
+
+//        cout << "neut Px,Py,Pz,E" << endl; 
+//        cout << neut.Px() << endl; 
+//        cout << neut.Py() << endl; 
+//        cout << neut.Pz() << endl; 
+//        cout << neut.E() << endl; 
+
+//        cout << "lep_eta,phi  met_pt,phi met_eta_p/m value,transverseMass" << endl; 
+//        cout << lep_eta << endl; 
+//        cout << lep_phi << endl; 
+//        cout << met_pt << endl; 
+//        cout << met_phi << endl; 
+//        cout << met_eta_p << endl; 
+//        cout << met_eta_m << endl; 
+//        cout << value << endl; 
+//        cout << transverseMass << endl; 
+    }
+    return value;
+}
+
+//Sum$(leptonicTopMass(jets_pt, jets_eta, jets_phi, jets_mass, jets_csv, leps_pt[0], leps_phi[0], leps_eta[0], met_pt, met_phi, Iteration$, Length$))
+
+//sverse mass becomes
+
+//        M T 2 → 2 E T , 1 E T , 2 ( 1 − cos ⁡ ϕ ) {\displaystyle M_{T}^{2}\rightarrow 2E_{T,1}E_{T,2}\left(1-\cos \phi \right)} M_{T}^2 \rightarrow 2 E_{T, 1} E_{T, 2} \left( 1 - \cos \phi \right)
+
 
 // Sum$(product(jets_pt,Iteration$,Length$))
 
