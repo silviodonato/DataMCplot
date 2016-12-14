@@ -22,3 +22,16 @@ def myFunction ( tree ):
     pt1 = tree.jets_pt[0]
     pt2 = tree.jets_pt[0]
     return pt1+pt2
+
+# Grid-control
+
+You can submit multiple jobs in parallel using grid-control.
+The first step is the creation of a ".csv" with the jobs list:
+~~~
+./makeParametersCSV.py configs/####YOURCONFIGURATION#####.py
+~~~
+Then, you can submit the jobs with the command:
+~~~
+#if needed, delete the "plots" folder
+./grid-control/go.py -c gc.conf  -cG
+~~~
