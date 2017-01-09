@@ -1,6 +1,6 @@
 import ROOT
 import array
-
+import os,sys
 
 def getROC(background, signal):
     xaxis = background.GetXaxis()
@@ -38,18 +38,66 @@ def doROC(fileName):
     list_ = c1.GetListOfPrimitives()[1].GetListOfPrimitives()
     stack = list_[1]
     background = stack.GetStack().Last().Clone("background")
-    signal = list_[3]
+    signal = list_[2]
     roc = getROC(background,signal)
     c2 = ROOT.TCanvas()
     c2.SetGridx()
     c2.SetGridy()
     roc.Draw("APL")
-    newFileName = fileName.replace(".root","_ROC.root")
-    c2.SaveAs(newFileName)
-    c2.SaveAs(newFileName.replace(".root",".png"))
+    folder = fileName.split("/")[:-1]
+    folder[-1] = "ROC"
+    folder = '/'.join(folder)
+    name = fileName.split("/")[-1]
+    os.system("mkdir -p %s"%folder)
+    folder = folder+"/root"
+    outputFileName = folder+"/"+name
+    os.system("mkdir -p %s"%folder)
+    c2.SaveAs(folder+"/"+name)
+    
+    folder = folder.replace("root","png")
+    name = name.replace("root","png")
+    os.system("mkdir -p %s"%folder)
+    c2.SaveAs(folder+"/"+name)
 
 if __name__ == "__main__":
     ROOT.gROOT.SetBatch()
+    inputFiles = sys.argv[1:]
+    print "Input files: ", inputFiles
+    
+    for inputFile in inputFiles:
+        doROC(inputFile)
+
+
+#    doROC("plotsDec24/SumCSVnjetsbtagCSV1IterationLength.root")
+#    doROC("plotsDec24/SumCSVnjetsbtagCSV2IterationLength.root")
+#    doROC("plotsDec24/SumCSVnjetsbtagCSV3IterationLength.root")
+#    doROC("plotsDec24/SumCSVnjetsbtagCSV4IterationLength.root")
+
+#    doROC("plotsDec24/btagLRgeq2bleq1bbtagCSV.root")
+#    doROC("plotsDec24/btagLR4b2bbtagCSV.root")
+#    doROC("plotsDec24/btagLR3b2bbtagCSV.root")
+#    doROC("plotsDec24/btagLR4b3bbtagCSV.root")
+
+#    doROC("plotsDec24/SumCSVnjetsqgl1IterationLength.root")
+#    doROC("plotsDec24/SumCSVnjetsqgl2IterationLength.root")
+#    doROC("plotsDec24/SumCSVnjetsqgl3IterationLength.root")
+#    doROC("plotsDec24/SumCSVnjetsqgl4IterationLength.root")
+
+#    doROC("plotsDec24/qgLR4bflavour3q0q.root")
+#    doROC("plotsDec24/qgLR4bflavour4q0q.root")
+#    doROC("plotsDec24/qgLR4bflavour4q3q.root")
+#    doROC("plotsDec24/qgLR4bflavour5q4q.root")
+
+#    doROC("plotsDec24/qgLR3bflavour3q0q.root")
+#    doROC("plotsDec24/qgLR3bflavour3q2q.root")
+#    doROC("plotsDec24/qgLR3bflavour4q0q.root")
+#    doROC("plotsDec24/qgLR3bflavour4q3q.root")
+
+#    doROC("plotsDec24/root/logmemtthFH1w1w2h2tp.root")
+#    doROC("plotsDec24/root/logmemttbbFH1w1w2h2tp.root")
+#    doROC("plotsDec24/root/memtthFH1w1w2h2tpmemttbbFH1w1w2h2tpmemtthFH1w1w2h2tp.root")
+
+    '''
     doROC("preselection/SumCSVnjetsqgl2IterationLength.root")
     doROC("preselection/Altjetspt50.root")
     doROC("preselection/Altjetspt60.root")
@@ -73,7 +121,6 @@ if __name__ == "__main__":
     doROC("preselection/qgLR4bflavour3q0q.root")
     doROC("preselection/qgLR4bflavour3q2q.root")
     doROC("preselection/qgLR4bflavour4q0q.root")
-    '''
     doROC("preselection_2btag/Altjetspt50.root")
     doROC("preselection_2btag/Altjetspt60.root")
     doROC("preselection_2btag/Altjetspt70.root")
