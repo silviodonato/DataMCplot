@@ -51,8 +51,10 @@ for userFunction in userFunctions:
 
 ## define a function to find the optimal overlay scale
 def getOverlayScale(signalPlot,stack):
-    maxSig = signalPlot.GetMaximum()
-    maxStack = stack.GetMaximum()
+    maxSig = signalPlot.GetMaximum() + 1E-9
+    maxStack = stack.GetMaximum() + 1E-9
+    print "maxStack: ",maxStack
+    print "maxSig: ",maxSig
     scale = str(maxStack/maxSig).split(".")[0]
     scale = int(scale[0])*(10**len(scale))/10
     return int(scale)
@@ -74,6 +76,7 @@ for group in groups:
 ## Evaluate the normalization to be applied to each simulated event
 for mc in datasetMC.values(): 
     if hasattr(mc,"tree"):
+        if totalLumi==0: totalLumi=40000 #if there is no data, normalize MC to 40fb-1
         mc.setSingleEventWeight(totalLumi)
 
 ## if it is a grid-control job, select which histos to run in this job
@@ -117,23 +120,27 @@ for histoOptions in histos:
     stack.GetHistogram().GetXaxis().SetLabelSize(0)
     stack.GetHistogram().GetXaxis().SetTitleSize(0)
 
-    stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.3)
     stack.Draw("HIST")
-    print stack.GetXaxis().GetLabelSize()
-    if dataPlot:
-        dataPlot.SetMarkerStyle(20) 
-        dataPlot.SetMarkerSize(1.2)
-        dataPlot.Draw("same,E1")
-        legend.AddEntry(dataPlot,"data (%s)"%str(int(dataPlot.Integral())),"P")
     if signalPlot:
         signalPlot.SetLineWidth(3)
         signalPlot.SetLineColor(ROOT.kBlue)
         signalPlot.SetMarkerColor(ROOT.kBlue)
         signalPlot.SetFillStyle(0)
-        scaleOverlay = getOverlayScale(signalPlot,dataPlot)
+        scaleOverlay = getOverlayScale(signalPlot,stack)
         signalPlot.Scale(scaleOverlay)
         signalPlot.Draw("same")
         legend.AddEntry(signalPlot,"signal x %s"%str(scaleOverlay),"l")
+        if not dataPlot:
+            dataPlot = signalPlot.Clone("dataPlot")
+            dataPlot.Reset()
+    if dataPlot.Integral()>0:
+        stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.3)
+        dataPlot.SetMarkerStyle(20) 
+        dataPlot.SetMarkerSize(1.2)
+        dataPlot.Draw("same,E1")
+        legend.AddEntry(dataPlot,"data (%s)"%str(int(dataPlot.Integral())),"P")
+    
+    print stack.GetXaxis().GetLabelSize()
     
     legend.Draw()
     
@@ -148,9 +155,11 @@ for histoOptions in histos:
     ratio.Draw("E1,same")
     
     os.system("mkdir -p %s"%histoOptions.folder)
-    outputName = histoOptions.folder+"/"+histoOptions.plotName+".png"
+    os.system("mkdir -p %s/png"%histoOptions.folder)
+    outputName = histoOptions.folder+"/png/"+histoOptions.plotName+".png"
     c2.SaveAs(outputName)
-    c2.SaveAs(outputName.replace(".png",".root"))
+    os.system("mkdir -p %s/root"%histoOptions.folder)
+    c2.SaveAs(outputName.replace("png","root"))
     print outputName+" saved"
     print "Time consuming: ",round(time.time() - t0,1)," s."
 
