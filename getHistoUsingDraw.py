@@ -5,7 +5,9 @@ import ROOT
 def getHistoUsingDraw(tree, histoOptions, cuts_weight, sampleName, isMC=True):
     expr = "%s >> histo(%s,%s,%s)"%(histoOptions.var,str(histoOptions.nbins),str(histoOptions.xmin),str(histoOptions.xmax))
     tree.Draw( expr, cuts_weight, histoOptions.opts)
+#    print 'tree.Draw( "%s", "%s", "%s")'%( expr, cuts_weight, histoOptions.opts)
     histo = ROOT.gDirectory.Get("histo")
+    ## debug in case of problems
     if type(histo)!=ROOT.TH1F:
         ROOT.gDirectory.ls()
         print tree.Draw("","")
