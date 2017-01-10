@@ -24,7 +24,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                 tmp = getHisto(sample.tree, histoOptions, sampleName)
                 tmp.Scale(sample.singleEventWeight)
                 integral = tmp.IntegralAndError(1,tmp.GetNbinsX(),doubleVariable)
-                print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1)
+                print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
                 totalMC += integral
                 totalMC2_err += doubleVariable[0]**2
                 if firstSample:
@@ -44,7 +44,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
             for sampleName in group.samples:
                 sample = datasetData[sampleName]
                 tmp = getHisto(sample.tree, histoOptions, sampleName, isMC=False)
-                print sampleName+":",round(tmp.Integral(),1)
+                print sampleName+":",round(tmp.Integral(),1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
                 if firstSample:
                     histo = tmp
                     histo.SetLineColor(ROOT.kBlack)
