@@ -4,6 +4,16 @@ from array import array
 ### create the TH1F plot using tree.Draw function
 
 doubleVariable = array('d',[0])
+
+## print histogram yields
+def printYield(histo):
+    integral = histo.IntegralAndError(1,histo.GetNbinsX(),doubleVariable)
+    output = str(round(integral,1))
+    output += " +/- "+str(round(doubleVariable[0],1))
+    output += " [u:"+str(round(histo.GetBinContent(0),1))+" ,"
+    output += "o:"+str(round(histo.GetBinContent(histo.GetNbinsX()+1),1))+"]"
+    return output
+
 ## create the THStack plot using tree.Draw function
 def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoOptions):
     dataset = {}
@@ -23,12 +33,10 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                 sample = datasetMC[sampleName]
                 isMC = True
                 histoOptions_ = histoOptions
-                if hasattr(sample,"weight"): ##overwrite weight if it is a datasetDataDriven
+                if hasattr(sample,"weight"): ##add weight if it is defined (see datasetDataDriven samples)
                     histoOptions_ = histoOptions.clone(weightMC=histoOptions.weightMC+"*"+sample.weight)
                 tmp = getHisto(sample.tree, histoOptions_, sampleName, isMC)
-
                 tmp.Scale(sample.singleEventWeight)
-                print "singleEventWeight:",sample.singleEventWeight
                 integral = tmp.IntegralAndError(1,tmp.GetNbinsX(),doubleVariable)
                 print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
                 totalMC += integral
@@ -37,6 +45,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                     histo = tmp
                     histo.SetFillColor(group.color)
                     histo.SetLineColor(ROOT.kBlack)
+                    histo.SetName(histoOptions.plotName+"_"+group.name)
                 else:
                     histo.Add(tmp)
                 firstSample = False
@@ -45,7 +54,7 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
                 print "copy signal for overlay"
                 signalPlot = histo.Clone("Overlay")
                 signalPlot.SetMarkerColor(signalPlot.GetLineColor())
-            leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
+#            leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
         elif group.samples[0] in datasetData:
             for sampleName in group.samples:
                 sample = datasetData[sampleName]
@@ -62,12 +71,12 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
         else:
             raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData. The group and dataset checker does not work!"%(group.samples[0],group.latexName))
     
-    print "Total MC:",round(totalMC,1)," +/- ",round((totalMC2_err**0.5),1)
-    print "Total Data:",round(totalData,1)
+    totalMC = stack.GetStack().Last().Integral()
+    totalData = dataPlot.Integral()
     
     normOpt = histoOptions.normalized
+    hists = stack.GetHists()
     if normOpt:
-        hists = stack.GetHists()
         ## if normOpt is a list, normalize the sample in the list to get yield(MC)==yield(data)
         if type(normOpt) is list:
             ## get the correction factor
@@ -82,14 +91,21 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
             if len(toNormalize)>0:
                 print "***Warning***"
                 print "The following samples have not been found:",toNormalize
-            correction = 1.+(totalData-totalMC)/integral
-            print "I'm correcting samples ",normOpt," by a factor ",correction
+                correction = 1
+            else:
+                correction = 1.+(totalData-totalMC)/integral
             ## scale the sample to be normalized
-            for histo in hists:
+            jj = 0
+            for histo in stack.GetHists():
                 sample_name = histo.GetName().split("_")[1]
                 if sample_name in normOpt:
-                    histo.Scale(correction)
-            
+                    print "I'm correcting ",sample_name," by a factor ",correction
+                    print stack.GetHists().At(jj).Integral()
+                    stack.GetHists().At(jj).Scale(correction)
+                    print stack.GetHists().At(jj).Integral()
+                    print jj
+                jj += 1
+                
         elif normOpt is True:
             ratio = totalData/totalMC
             for histo in hists:
@@ -97,7 +113,39 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
             print "Normalizing MC to data. Ratio:",ratio
         else:
              raise Exception('Please check the "normalized" option among the histogram options. It is must be a list or a boolean.') 
+        stack.Modified()
     
+    ## Print histrogram yields
+    print
+    print "### Histogram yields: ###"
+    for histo in hists:
+        sampleName = histo.GetName().split("_")[1]
+        print sampleName+": "+printYield(histo)
+    
+#    print
+#    print "### Total MC: "+printYield(stack.GetStack().Last())+" ###"
+    
+    print
+    print "### Total Data: "+printYield(dataPlot)+" ###"
+    
+    print
+    print "### Total Signal: "+printYield(signalPlot)+" ###"
+    
+#    ## fill legend
+#    for group in groups:
+#        groupIntegral = 0
+#        for histo in hists:
+#            histoName = histo.GetName().split("_")[1]
+#            for sampleName in group.samples:
+#                if sampleName is histoName:
+#                    groupIntegral += histo.Integral()
+#        leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
+#            
+#        print group.latexName
+#        firstSample = True
+#        if group.samples[0] in datasetMC:
+#    
+#    leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
     stack.Draw("goff")
     
     stack.GetXaxis().SetTitle(histoOptions.xTitle)

@@ -53,6 +53,7 @@ class GroupClass():
     def __init__(self, color, latexName, samples):
         self.color = color
         self.latexName = latexName
+        self.name =  self.latexName
         self.samples = samples
 
 class HistogramClass():
