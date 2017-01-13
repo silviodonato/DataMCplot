@@ -21,8 +21,14 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
         if group.samples[0] in datasetMC:
             for sampleName in group.samples:
                 sample = datasetMC[sampleName]
-                tmp = getHisto(sample.tree, histoOptions, sampleName)
+                isMC = True
+                histoOptions_ = histoOptions
+                if hasattr(sample,"weight"): ##overwrite weight if it is a datasetDataDriven
+                    histoOptions_ = histoOptions.clone(weightMC=histoOptions.weightMC+"*"+sample.weight)
+                tmp = getHisto(sample.tree, histoOptions_, sampleName, isMC)
+
                 tmp.Scale(sample.singleEventWeight)
+                print "singleEventWeight:",sample.singleEventWeight
                 integral = tmp.IntegralAndError(1,tmp.GetNbinsX(),doubleVariable)
                 print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
                 totalMC += integral
@@ -59,10 +65,38 @@ def getStackWithDataOverlayAndLegend(leg, datasetMC, datasetData, groups, histoO
     print "Total MC:",round(totalMC,1)," +/- ",round((totalMC2_err**0.5),1)
     print "Total Data:",round(totalData,1)
     
-    if histoOptions.normalized:
-        ratio = totalData/totalMC
-        for histo in stack.GetHists():
-            histo.Scale(ratio)
+    normOpt = histoOptions.normalized
+    if normOpt:
+        hists = stack.GetHists()
+        ## if normOpt is a list, normalize the sample in the list to get yield(MC)==yield(data)
+        if type(normOpt) is list:
+            ## get the correction factor
+            toNormalize = normOpt[:]
+            integral = 0
+            for histo in hists:
+                sample_name = histo.GetName().split("_")[1]
+                if sample_name in toNormalize:
+                    toNormalize.remove(sample_name)
+                    integral += histo.Integral()
+            ## give a warning in case some samples to be normalized are missing 
+            if len(toNormalize)>0:
+                print "***Warning***"
+                print "The following samples have not been found:",toNormalize
+            correction = 1.+(totalData-totalMC)/integral
+            print "I'm correcting samples ",normOpt," by a factor ",correction
+            ## scale the sample to be normalized
+            for histo in hists:
+                sample_name = histo.GetName().split("_")[1]
+                if sample_name in normOpt:
+                    histo.Scale(correction)
+            
+        elif normOpt is True:
+            ratio = totalData/totalMC
+            for histo in hists:
+                histo.Scale(ratio)
+            print "Normalizing MC to data. Ratio:",ratio
+        else:
+             raise Exception('Please check the "normalized" option among the histogram options. It is must be a list or a boolean.') 
     
     stack.Draw("goff")
     
