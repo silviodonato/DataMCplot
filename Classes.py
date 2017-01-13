@@ -25,7 +25,7 @@ class DatasetMCClass(DatasetClass):
         self.count = self.getCount()
         print self.fileName,self.count
     def getCount(self):
-        return self.tfile.Get("CountWeighted").GetBinContent(1)
+        return self.tfile.Get("Count").GetBinContent(1)
     def setSingleEventWeight(self,lumi):
         self.singleEventWeight = lumi * self.xsec / self.count
         
@@ -34,6 +34,20 @@ class DatasetDataClass(DatasetClass):
     def __init__(self, lumi, fileName):
         DatasetClass.__init__(self, fileName)
         self.lumi = lumi #pb
+
+class DatasetDataDrivenClass(DatasetClass):
+    def __init__(self, weight, lumi, fileName):
+        DatasetClass.__init__(self, fileName)
+        self.weight = weight
+    def loadTree(self):
+        DatasetClass.loadTree(self)
+        self.tree.GetEntry(0)
+        self.lumi = float(self.tree.luminosity)
+        print self.fileName
+    def setSingleEventWeight(self,lumi):
+        self.singleEventWeight = lumi / self.lumi
+        print "self.lumi:",self.lumi
+        
 
 class GroupClass():
     def __init__(self, color, latexName, samples):
