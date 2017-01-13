@@ -50,11 +50,14 @@ class DatasetDataDrivenClass(DatasetClass):
         
 
 class GroupClass():
-    def __init__(self, color, latexName, samples):
+    def __init__(self, color, latexName, samples, groupType):
         self.color = color
         self.latexName = latexName
-        self.name =  self.latexName
+        self.name = filter(str.isalnum, self.latexName)
         self.samples = samples
+        self.type = groupType
+        if not groupType in ["data","signal","background","backgroundFromData"]:
+            raise Exception('In group %s, the groupType is %s but it must be among ["data","signal","background","backgroundFromData"]')
 
 class HistogramClass():
     def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False):

@@ -27,7 +27,7 @@ print "I'm using "+options.config+" as configuration in configs folder."
 print ""
 options.config = options.config.replace("configs/","")
 config = importlib.import_module('configs.'+options.config.replace(".py",""))
-for el in ['histos','datasetMC','datasetData','DatasetDataDrivenClass','groups','userFunctions']:
+for el in ['histos','datasets','groups','userFunctions']:
     globals()[el]= getattr(config,el)
 
 ## import libraries
@@ -65,19 +65,20 @@ for group in groups:
     if len(group.samples)==0:
         raise ValueError("Group %s contains zero samples. Please fix it."%group.latexName)
     for sample in group.samples:
-        if sample in datasetData:
-            datasetData[sample].loadTree()
-            totalLumi += datasetData[sample].lumi
-        elif sample in datasetMC:
-            datasetMC[sample].loadTree()
+        if sample in datasets:
+            datasets[sample].loadTree()
+            if group.type is "data":
+                totalLumi += datasets[sample].lumi
         else:
-            raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData."%(sample,group.latexName))
+            raise ValueError("Dataset %s in group %s is not defined among datasets."%(sample,group.latexName))
+
+#if there is no data, normalize MC to 40fb-1
+if totalLumi==0: totalLumi=40000
 
 ## Evaluate the normalization to be applied to each simulated event
-for mc in datasetMC.values(): 
-    if hasattr(mc,"tree"):
-        if totalLumi==0: totalLumi=40000 #if there is no data, normalize MC to 40fb-1
-        mc.setSingleEventWeight(totalLumi)
+for dataset in datasets.values(): 
+    if hasattr(dataset,"tree") and hasattr(dataset,"setSingleEventWeight"):
+        dataset.setSingleEventWeight(totalLumi)
 
 ## if it is a grid-control job, select which histos to run in this job
 print len(histos)
@@ -113,7 +114,7 @@ for histoOptions in histos:
     padPlot.SetGridy()
     padPlot.cd()
     
-    stack,dataPlot,signalPlot = getStackWithDataOverlayAndLegend(legend,datasetMC,datasetData, groups, histoOptions)
+    stack,dataPlot,signalPlot = getStackWithDataOverlayAndLegend(legend,datasets, groups, histoOptions)
     padSizeRatio = (padPlot.GetWh()*padPlot.GetAbsHNDC())/(padRatio.GetWh()*padRatio.GetAbsHNDC())
 
     stack.GetHistogram().GetXaxis().SetTickLength(0)
