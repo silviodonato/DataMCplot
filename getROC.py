@@ -101,6 +101,7 @@ def doROC(fileName):
     folder = '/'.join(folder)
     name = fileName.split("/")[-1]
     os.system("mkdir -p %s"%folder)
+    
     folder = folder+"/root"
     outputFileName = folder+"/"+name
     os.system("mkdir -p %s"%folder)
@@ -108,6 +109,11 @@ def doROC(fileName):
     
     folder = folder.replace("root","png")
     name = name.replace("root","png")
+    os.system("mkdir -p %s"%folder)
+    c2.SaveAs(folder+"/"+name)
+    
+    folder = folder.replace("png","pdf")
+    name = name.replace("png","pdf")
     os.system("mkdir -p %s"%folder)
     c2.SaveAs(folder+"/"+name)
 
