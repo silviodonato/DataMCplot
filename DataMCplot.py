@@ -170,15 +170,26 @@ for histoOptions in histos:
         signalPlot.Scale(scaleOverlay)
         signalPlot.Draw("same")
         legend.AddEntry(signalPlot,"signal x %s"%str(scaleOverlay),"l")
-        if not dataPlot:
-            dataPlot = signalPlot.Clone("dataPlot")
-            dataPlot.Reset()
+    
+    if not dataPlot:
+        dataPlot = signalPlot.Clone("dataPlot")
+        dataPlot.Reset()
+    
     if dataPlot.Integral()>0:
         stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.5)
         dataPlot.SetMarkerStyle(20) 
         dataPlot.SetMarkerSize(1.2)
         dataPlot.Draw("same,E1")
         legend.AddEntry(dataPlot,"data (%s)"%str(int(dataPlot.Integral())),"P")
+    
+    mcPlot = stack.GetStack().Last()
+    mcPlot.SetFillStyle(3004)
+    mcPlot.SetFillColor(ROOT.kBlack)
+    mcPlot.Draw("E2,same")
+    legend.AddEntry(mcPlot,"MC stat. err.","F")
+    
+    
+    stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.5)
     
     print stack.GetXaxis().GetLabelSize()
     

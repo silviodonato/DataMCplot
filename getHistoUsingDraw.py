@@ -5,7 +5,7 @@ import ROOT
 def getHistoUsingDraw(tree, histoOptions, cuts_weight, sampleName, isMC=True):
     expr = "%s >> histo(%s,%s,%s)"%(histoOptions.var,str(histoOptions.nbins),str(histoOptions.xmin),str(histoOptions.xmax))
     tree.Draw( expr, cuts_weight, histoOptions.opts)
-#    print 'tree.Draw( "%s", "%s", "%s")'%( expr, cuts_weight, histoOptions.opts)
+    print 'tree.Draw( "%s", "%s", "%s")'%( expr, cuts_weight, histoOptions.opts)
     histo = ROOT.gDirectory.Get("histo")
     ## debug in case of problems
     if type(histo)!=ROOT.TH1F:
@@ -13,6 +13,7 @@ def getHistoUsingDraw(tree, histoOptions, cuts_weight, sampleName, isMC=True):
         print tree.Draw("","")
         assert(type(histo)==ROOT.TH1F)
     histo.SetName(histoOptions.plotName+"_"+sampleName)
+    histo.Sumw2()
     return histo
 
 ## create the TH1F plot using looping the tree manually and evaluating the function defined as var
@@ -26,6 +27,7 @@ def getHistoUsingLoop(tree, histoOptions, cuts_weight, sampleName, isMC=True):
         if weight!=0:
             value = function(tree)
             histo.Fill(value,weight)
+    histo.Sumw2()
     return histo
 
 ## create the TH1F plot using tree.Draw function or looping on the tree
