@@ -60,7 +60,7 @@ class GroupClass():
             raise Exception('In group %s, the groupType is %s but it must be among ["data","signal","background","backgroundFromData"]')
 
 class HistogramClass():
-    def __init__(self, var="", nbins=1, xmin=0, xmax=1, folder=".", weightMC="1.", cutsMC="1", cutsData="1", treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False):
+    def __init__(self, var="", nbins=1, xmin=0, xmax=1, folder=".", weightMC="1.", cutsMC="1", cutsData="1", treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False, blinded=False):
         self.var = var
         self.nbins = nbins
         self.xmin = xmin
@@ -75,6 +75,7 @@ class HistogramClass():
         self.opts = opts
         self.treeVars = treeVars
         self.normalized =normalized
+        self.blinded =blinded
         self.init()
         
     def init(self):

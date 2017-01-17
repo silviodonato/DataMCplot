@@ -55,23 +55,25 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
                 signalPlot.SetMarkerColor(signalPlot.GetLineColor())
 #            leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
         elif group.type in ["data"]:
-            for sampleName in group.samples:
-                sample = datasets[sampleName]
-                tmp = getHisto(sample.tree, histoOptions, sampleName, isMC=False)
-                print sampleName+":",round(tmp.Integral(),1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
-                if firstSample:
-                    histo = tmp
-                    histo.SetLineColor(ROOT.kBlack)
-                else:
-                    histo.Add(tmp)
-                firstSample = False
-            dataPlot=histo
-            totalData += dataPlot.Integral()
+            if not histoOptions.blinded:
+                for sampleName in group.samples:
+                    sample = datasets[sampleName]
+                    tmp = getHisto(sample.tree, histoOptions, sampleName, isMC=False)
+                    print sampleName+":",round(tmp.Integral(),1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
+                    if firstSample:
+                        histo = tmp
+                        histo.SetLineColor(ROOT.kBlack)
+                    else:
+                        histo.Add(tmp)
+                    firstSample = False
+                dataPlot=histo
+                totalData += dataPlot.Integral()
         else:
             raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData. The group and dataset checker does not work!"%(group.samples[0],group.latexName))
     
     totalMC = stack.GetStack().Last().Integral()
-    totalData = dataPlot.Integral()
+    if dataPlot:
+        totalData = dataPlot.Integral()
     
     normOpt = histoOptions.normalized
     hists = stack.GetHists()
@@ -108,11 +110,13 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
     print
     print "### Total MC: "+printYield(stack.GetStack().Last())+" ###"
     
-    print
-    print "### Total Data: "+printYield(dataPlot)+" ###"
+    if dataPlot:
+        print
+        print "### Total Data: "+printYield(dataPlot)+" ###"
     
-    print
-    print "### Total Signal: "+printYield(signalPlot)+" ###"
+    if signalPlot:
+        print
+        print "### Total Signal: "+printYield(signalPlot)+" ###"
     
     ## fill legend
     for group in groups:
@@ -170,6 +174,6 @@ def getRatio(data, stack, padSizeRatio):
             ratioMC.SetBinError(i,10.)
     
     ratioMC.SetFillStyle(3001)
-    ratioMC.SetFillColor(ROOT.kGray)
+    ratioMC.SetFillColor(ROOT.kGray+1)
         
     return ratio, ratioMC
