@@ -5,21 +5,26 @@
 
 
 void makeQCDdataDrivenSample(){
+    float luminosity = 10593.875;
+    float xsectTT = 831.76;
+    
     TTreeFormula* triggerF;
     TTreeFormula* CR4bf;
     TTreeFormula* CR3bf;
     int i; 
-    float xsectTT = 831.76;
-    float countTT = 3.81389e+07;
+    
     char triggerS[] = "(HLT_BIT_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v||HLT_BIT_HLT_PFHT450_SixJet40_BTagCSV_p056_v)";
-    char fileTT[] = "Jan6/Jan6__TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root";
-    char fileData[] = "Jan6/Jan6__JetHT.root";
+    char fileTT[] = "Jan16/Jan6__TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root";
+    char fileData[] = "Jan16/Jan6__JetHT.root";
     char CR4bs[] = "btag_LR_4b_2b_btagCSV>0.75 && btag_LR_4b_2b_btagCSV<0.88";
     char CR3bs[] = "btag_LR_3b_2b_btagCSV>0.6 && btag_LR_3b_2b_btagCSV<0.8 && btag_LR_4b_2b_btagCSV<0.99";
     float SR4b = 0.995;
     float SR3b = 0.995;
-    float luminosity = 4600;
     
+    auto fileTT_ = new TFile(fileTT);
+    float countTT = ((TH1F*) fileTT_->Get("Count"))->GetBinContent(1);
+    fileTT_->Close();
+
     auto fileout = new TFile("test.root","recreate");
     auto mchain = new TChain("tree");
     mchain->Add(fileTT);
