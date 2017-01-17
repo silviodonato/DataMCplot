@@ -19,8 +19,9 @@ for config in configs:
     tempForCSV = importlib.import_module('configs.'+configName)
     counter = 0
     for histo in tempForCSV.histos:
-        print "%s;%s;%s"%(config,njobs,counter)
-        f.write("%s;%s;%s\n"%(config,njobs,counter))
+        if counter<njobs:
+            print "%s;%s;%s"%(config,njobs,counter)
+            f.write("%s;%s;%s\n"%(config,njobs,counter))
         plots.append(histo.folder+"/"+histo.plotName+".png")
         counter+=1
 
