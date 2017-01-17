@@ -3,7 +3,7 @@ import copy
 import os.path 
 
 class DatasetClass(object):
-    def __init__(self, fileName):
+    def __init__(self, fileName=""):
         self.fileName = fileName
     def loadTree(self):
         if hasattr(self,"tree"):
@@ -17,7 +17,7 @@ class DatasetClass(object):
         self.tfile.Close()
 
 class DatasetMCClass(DatasetClass):
-    def __init__(self, xsec, fileName):
+    def __init__(self, xsec=1., fileName=""):
         DatasetClass.__init__(self, fileName)
         self.xsec = xsec
     def loadTree(self):
@@ -31,12 +31,12 @@ class DatasetMCClass(DatasetClass):
         
 
 class DatasetDataClass(DatasetClass):
-    def __init__(self, lumi, fileName):
+    def __init__(self, lumi=1., fileName=""):
         DatasetClass.__init__(self, fileName)
         self.lumi = lumi #pb
 
 class DatasetDataDrivenClass(DatasetClass):
-    def __init__(self, weight, lumi, fileName):
+    def __init__(self, weight=1., lumi=1., fileName=""):
         DatasetClass.__init__(self, fileName)
         self.weight = weight
     def loadTree(self):
@@ -50,7 +50,7 @@ class DatasetDataDrivenClass(DatasetClass):
         
 
 class GroupClass():
-    def __init__(self, color, latexName, samples, groupType):
+    def __init__(self, color=3, latexName="", samples=[], groupType="data"):
         self.color = color
         self.latexName = latexName
         self.name = filter(str.isalnum, self.latexName)
@@ -60,7 +60,7 @@ class GroupClass():
             raise Exception('In group %s, the groupType is %s but it must be among ["data","signal","background","backgroundFromData"]')
 
 class HistogramClass():
-    def __init__(self, var, nbins, xmin, xmax, folder, weightMC, cutsMC, cutsData, treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False):
+    def __init__(self, var="", nbins=1, xmin=0, xmax=1, folder=".", weightMC="1.", cutsMC="1", cutsData="1", treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False):
         self.var = var
         self.nbins = nbins
         self.xmin = xmin
@@ -79,7 +79,9 @@ class HistogramClass():
         
     def init(self):
         if self.xTitle == "": self.xTitle = self.var
-        if self.plotName=="": self.plotName = filter(str.isalnum, self.xTitle)
+        if self.plotName=="":
+            self.plotName = filter(str.isalnum, self.xTitle)
+            self.plotName = self.plotName.replace("GeV","")
         bin_size = 1.*(self.xmax-self.xmin)/self.nbins
         if self.yTitle == "": self.yTitle = "Events/"+str(bin_size)
         if self.opts == "": self.opts = "HIST goff"

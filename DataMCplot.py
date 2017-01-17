@@ -40,6 +40,7 @@ from copy import *
 from array import array
 from getStackPlot import getStackWithDataOverlayAndLegend,createLegend,getRatio
 import time
+from getROC import doROC
 
 ## run in batch mode, if requested
 if options.batch:
@@ -48,6 +49,39 @@ if options.batch:
 ## load ROOT functions
 for userFunction in userFunctions:
     ROOT.gROOT.LoadMacro(userFunction)
+
+def printObj(text_file, obj, objName):
+    for el in dir(obj):
+        value = getattr(obj,el)
+        if "__" in el or callable(value):
+            pass
+        elif isinstance(value, (int, long, float, complex, bool, set, list)):
+            text_file.write('%s.%s = %s\n'%(objName,el,value))
+        elif isinstance(value, (str)):
+            text_file.write('%s.%s = "%s"\n'%(objName,el,value))
+
+## define a function that print out the configuration used for each plot
+def printConf(histoOptions,datasets,groups, outputFileName):
+    text_file = open(outputFileName, "w")
+    text_file.write("from Classes import DatasetMCClass,DatasetDataClass,DatasetDataDrivenClass,GroupClass,HistogramClass \n") 
+    text_file.write("\n") 
+    text_file.write("histoOptions = HistogramClass()\n") 
+    printObj(text_file,histoOptions,"histoOptions")
+    text_file.write("\n") 
+
+    text_file.write("datasets = {}\n") 
+    for dataset in datasets:
+        text_file.write('datasets["%s"] = %s()\n'%(dataset,datasets[dataset].__class__.__name__)) 
+        printObj(text_file,datasets[dataset],'datasets["%s"]'%dataset)
+    text_file.write("\n") 
+
+    text_file.write("groups = [0]*%s\n"%len(groups)) 
+    for i in range(len(groups)):
+        text_file.write("groups[%s] = %s()\n"%(str(i),groups[i].__class__.__name__)) 
+        printObj(text_file,groups[i],"groups[%s]"%str(i))
+    text_file.write("\n") 
+
+    text_file.close()
 
 ## define a function to find the optimal overlay scale
 def getOverlayScale(signalPlot,stack):
@@ -74,6 +108,11 @@ for group in groups:
 
 #if there is no data, normalize MC to 40fb-1
 if totalLumi==0: totalLumi=40000
+
+#add a label with the lumi
+ROOT.gROOT.LoadMacro("CMS_lumi.C")
+ROOT.gROOT.ProcessLine('lumi_7TeV = "%s fb^{-1}";'%(round(totalLumi/1000,1)))
+ROOT.gROOT.ProcessLine('extraText="Preliminary"')
 
 ## Evaluate the normalization to be applied to each simulated event
 for dataset in datasets.values(): 
@@ -135,7 +174,7 @@ for histoOptions in histos:
             dataPlot = signalPlot.Clone("dataPlot")
             dataPlot.Reset()
     if dataPlot.Integral()>0:
-        stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.3)
+        stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.5)
         dataPlot.SetMarkerStyle(20) 
         dataPlot.SetMarkerSize(1.2)
         dataPlot.Draw("same,E1")
@@ -144,6 +183,7 @@ for histoOptions in histos:
     print stack.GetXaxis().GetLabelSize()
     
     legend.Draw()
+    ROOT.CMS_lumi(padPlot)
     
     padRatio.cd()
     
@@ -155,12 +195,21 @@ for histoOptions in histos:
     mcError.Draw("E3")
     ratio.Draw("E1,same")
     
+    
     os.system("mkdir -p %s"%histoOptions.folder)
     os.system("mkdir -p %s/png"%histoOptions.folder)
     outputName = histoOptions.folder+"/png/"+histoOptions.plotName+".png"
     c2.SaveAs(outputName)
     os.system("mkdir -p %s/root"%histoOptions.folder)
     c2.SaveAs(outputName.replace("png","root"))
+    os.system("mkdir -p %s/pdf"%histoOptions.folder)
+    c2.SaveAs(outputName.replace("png","pdf"))
+    os.system("mkdir -p %s/conf"%histoOptions.folder)
+    outputConf = outputName.replace("png","conf")
+    outputConf = outputConf.replace(".conf",".py")
+    printConf(histoOptions,datasets,groups,outputConf)
     print outputName+" saved"
     print "Time consuming: ",round(time.time() - t0,1)," s."
-
+    
+    print '\nLaunching doROC("%s")\n'%(outputName.replace("png","root"))
+    doROC(outputName.replace("png","root"))
