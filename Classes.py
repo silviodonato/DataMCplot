@@ -36,7 +36,7 @@ class DatasetDataClass(DatasetClass):
         self.lumi = lumi #pb
 
 class DatasetDataDrivenClass(DatasetClass):
-    def __init__(self, weight=1., lumi=1., fileName=""):
+    def __init__(self, weight=1., fileName=""):
         DatasetClass.__init__(self, fileName)
         self.weight = weight
     def loadTree(self):
@@ -60,7 +60,7 @@ class GroupClass():
             raise Exception('In group %s, the groupType is %s but it must be among ["data","signal","background","backgroundFromData"]')
 
 class HistogramClass():
-    def __init__(self, var="", nbins=1, xmin=0, xmax=1, folder=".", weightMC="1.", cutsMC="1", cutsData="1", treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False, blinded=False):
+    def __init__(self, var="", nbins=1, xmin=0, xmax=1, folder=".", weightMC="1.", cutsMC="1", cutsData="1", treeVars=set(), xTitle="", yTitle="", plotName="", opts="", normalized=False, blinded=False, category="", region=""):
         self.var = var
         self.nbins = nbins
         self.xmin = xmin
@@ -76,6 +76,8 @@ class HistogramClass():
         self.treeVars = treeVars
         self.normalized =normalized
         self.blinded =blinded
+        self.category =category
+        self.region =region
         self.init()
         
     def init(self):
@@ -90,8 +92,8 @@ class HistogramClass():
             self.treeVars.update(self.getUsedVariables(self.cutsMC))
             self.treeVars.update(self.getUsedVariables(self.cutsData))
             self.treeVars.update(self.getUsedVariables(self.weightMC))
-    
-    
+        category = self.category.split("_")
+        
     def clone(self,**args):
         new = copy.copy(self)
         new.xTitle=""

@@ -87,8 +87,6 @@ def printConf(histoOptions,datasets,groups, outputFileName):
 def getOverlayScale(signalPlot,stack):
     maxSig = signalPlot.GetMaximum() + 1E-9
     maxStack = stack.GetMaximum() + 1E-9
-    print "maxStack: ",maxStack
-    print "maxSig: ",maxSig
     scale = str(maxStack/maxSig).split(".")[0]
     scale = int(scale[0])*(10**len(scale))/10
     return int(scale)
@@ -168,7 +166,7 @@ for histoOptions in histos:
         signalPlot.SetFillStyle(0)
         scaleOverlay = getOverlayScale(signalPlot,stack)
         signalPlot.Scale(scaleOverlay)
-        signalPlot.Draw("same")
+        signalPlot.Draw("HIST,same")
         legend.AddEntry(signalPlot,"signal x %s"%str(scaleOverlay),"l")
     
     if not dataPlot:
@@ -182,11 +180,11 @@ for histoOptions in histos:
         dataPlot.Draw("same,E1")
         legend.AddEntry(dataPlot,"data (%s)"%str(int(dataPlot.Integral())),"P")
     
-    mcPlot = stack.GetStack().Last()
+    mcPlot = stack.GetStack().Last().Clone("mcPlot")
     mcPlot.SetFillStyle(3004)
     mcPlot.SetFillColor(ROOT.kBlack)
     mcPlot.Draw("E2,same")
-    legend.AddEntry(mcPlot,"MC stat. err.","F")
+    legend.AddEntry(mcPlot,"MC stat. unc.","F")
     
     
     stack.SetMaximum(max(stack.GetMaximum(),dataPlot.GetMaximum())*1.5)
@@ -194,6 +192,13 @@ for histoOptions in histos:
     print stack.GetXaxis().GetLabelSize()
     
     legend.Draw()
+    textLumi = "%s fb^{-1}"%(round(totalLumi/1000,1))
+    if histoOptions.region:
+        textLumi += " ["+ histoOptions.region
+        if histoOptions.category:
+            textLumi += ", "+ histoOptions.category
+        textLumi += "]"
+    ROOT.gROOT.ProcessLine('lumi_7TeV = "%s";'%textLumi)
     ROOT.CMS_lumi(padPlot)
     
     padRatio.cd()
