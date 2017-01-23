@@ -30,6 +30,9 @@ def getROC(background, signal):
     
     bkg_tot = bkg_int[nbins+2]
     sig_tot = sig_int[nbins+2]
+    
+    if bkg_tot==0 : bkg_tot=1E-6
+    if sig_tot==0 : sig_tot=1E-6
 
     bestS2_B = -3
     bestCut = 0
