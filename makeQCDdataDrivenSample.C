@@ -1,5 +1,6 @@
 #include"TChain.h"
 #include"TFile.h"
+#include"TH1F.h"
 #include"TTreeFormula.h"
 #include<iostream>
 
@@ -9,15 +10,18 @@ void makeQCDdataDrivenSample(){
     float xsectTT = 831.76;
     
     TTreeFormula* triggerF;
+    TTreeFormula* cutF;
     TTreeFormula* CR4bf;
     TTreeFormula* CR3bf;
     int i; 
+    bool toBeFilled;
     
     char triggerS[] = "(HLT_BIT_HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v||HLT_BIT_HLT_PFHT450_SixJet40_BTagCSV_p056_v)";
+    char cutS[] = "Alt$(jets_pt[5],0)>50 && ht40>600 && Sum$(jets_btagCSV>0.8)>=2";
     char fileTT[] = "Jan16/Jan6__TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root";
     char fileData[] = "Jan16/Jan6__JetHT.root";
     char CR4bs[] = "btag_LR_4b_2b_btagCSV>0.75 && btag_LR_4b_2b_btagCSV<0.88";
-    char CR3bs[] = "btag_LR_3b_2b_btagCSV>0.6 && btag_LR_3b_2b_btagCSV<0.8 && btag_LR_4b_2b_btagCSV<0.99";
+    char CR3bs[] = "btag_LR_4b_2b_btagCSV<0.99 && btag_LR_3b_2b_btagCSV>0.60 && btag_LR_3b_2b_btagCSV<0.80";
     float SR4b = 0.995;
     float SR3b = 0.995;
     
@@ -66,19 +70,26 @@ void makeQCDdataDrivenSample(){
 //    nentries = 10000;
     i=0;
     mchain->GetEntry(i);
+    cutF = new TTreeFormula("cutF", cutS, mchain->GetTree());
     CR4bf = new TTreeFormula("CR4bf", CR4bs, mchain->GetTree());
     CR3bf = new TTreeFormula("CR3bf", CR3bs, mchain->GetTree());
     for(; i<nentries && mchain->GetTreeNumber()==0; i++, mchain->GetEntry(i)){
+//        if(cutF->EvalInstance())
+        if( true )
+        {
                 if (i%10000==0) cout << "i=" << i << endl;
                 btag_LR_4b_2b_btagCSV = 0;
                 btag_LR_3b_2b_btagCSV = 0;
                 if (CR4bf->EvalInstance()){
                     btag_LR_4b_2b_btagCSV = 0.995;
-                    newTree->Fill();
-                } else if (CR3bf->EvalInstance()){
-                    btag_LR_3b_2b_btagCSV = 0.995;
-                    newTree->Fill();
+                    toBeFilled = true;
                 }
+                if (CR3bf->EvalInstance()){
+                    btag_LR_3b_2b_btagCSV = 0.995;
+                    toBeFilled = true;
+                }
+                if (toBeFilled) newTree->Fill();
+        }
     }
     
 //    i = 274074;
@@ -88,23 +99,28 @@ void makeQCDdataDrivenSample(){
     cout << "\nI'm doing data\n";
     qcdWeight = 1.;
     triggerF = new TTreeFormula("triggerF", triggerS, mchain->GetTree());
+    cutF = new TTreeFormula("cutF", cutS, mchain->GetTree());
     CR4bf = new TTreeFormula("CR4bf", CR4bs, mchain->GetTree());
     CR3bf = new TTreeFormula("CR3bf", CR3bs, mchain->GetTree());
     for(; i<nentries && mchain->GetTreeNumber()==1; i++, mchain->GetEntry(i)){
           if (i%10000==0) cout << "i=" << i << endl;
+//          if(triggerF->EvalInstance() && cutF->EvalInstance())
           if(triggerF->EvalInstance())
           {
                 if (i%10000==0) cout << "i=" << i << endl;
                 btag_LR_4b_2b_btagCSV = 0;
                 btag_LR_3b_2b_btagCSV = 0;
                 if (CR4bf->EvalInstance()){
-                    btag_LR_4b_2b_btagCSV = SR4b;
-                    newTree->Fill();
-                } else if (CR3bf->EvalInstance()){
-                    btag_LR_3b_2b_btagCSV = SR3b;
-                    newTree->Fill();
+                    btag_LR_4b_2b_btagCSV = 0.995;
+                    toBeFilled = true;
                 }
+                if (CR3bf->EvalInstance()){
+                    btag_LR_3b_2b_btagCSV = 0.995;
+                    toBeFilled = true;
+                }
+                if (toBeFilled) newTree->Fill();
           }
     }
     newTree->Write();
+    fileout->Close();
 }
