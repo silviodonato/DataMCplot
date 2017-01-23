@@ -16,9 +16,6 @@ def printYield(histo):
 
 ## create the THStack plot using tree.Draw function
 def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
-    totalMC = 0.
-    totalData = 0.
-    totalMC2_err = 0.
     dataPlot = None
     signalPlot = None
     nbackgroundFromData = 0
@@ -31,15 +28,13 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
                 histoOptions_ = histoOptions
                 sample = datasets[sampleName]
                 if group.type is "backgroundFromData": ##add "weight" if it is a data driven background
-                    histoOptions_ = histoOptions.clone(weightMC=histoOptions.weightMC+"*"+sample.weight)
+                    histoOptions_ = histoOptions.clone(weightMC="(%s!=1)*%s*%s+(%s==1)"%(sample.weight, sample.weight, histoOptions.weightMC, sample.weight))
                     nbackgroundFromData += 1
                 isMC = True
                 tmp = getHisto(sample.tree, histoOptions_, sampleName, isMC)
                 tmp.Scale(sample.singleEventWeight)
                 integral = tmp.IntegralAndError(1,tmp.GetNbinsX(),doubleVariable)
                 print sampleName+":",round(integral,1)," +/- ",round(doubleVariable[0],1),"[u:",round(tmp.GetBinContent(0),1)," ,o:",round(tmp.GetBinContent(tmp.GetNbinsX()+1),1),"]"
-                totalMC += integral
-                totalMC2_err += doubleVariable[0]**2
                 if firstSample:
                     histo = tmp
                     histo.SetFillColor(group.color)
@@ -49,13 +44,12 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
                     histo.Add(tmp)
                 firstSample = False
             stack.Add(histo)
-            if group.latexName.lower() == "signal":
+            if group.type == "signal":
                 print "copy signal for overlay"
                 signalPlot = histo.Clone("Overlay")
                 signalPlot.SetMarkerColor(signalPlot.GetLineColor())
 #            leg.AddEntry(histo,group.latexName+" (%s)"%str(round(histo.Integral(),1)),"f")
         elif group.type in ["data"]:
-            if not histoOptions.blinded:
                 for sampleName in group.samples:
                     sample = datasets[sampleName]
                     tmp = getHisto(sample.tree, histoOptions, sampleName, isMC=False)
@@ -67,11 +61,11 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
                         histo.Add(tmp)
                     firstSample = False
                 dataPlot=histo
-                totalData += dataPlot.Integral()
         else:
             raise ValueError("Dataset %s in group %s is not defined in any DatasetMC nor DatasetData. The group and dataset checker does not work!"%(group.samples[0],group.latexName))
     
     totalMC = stack.GetStack().Last().Integral()
+    totalData = 0.
     if dataPlot:
         totalData = dataPlot.Integral()
     
@@ -88,7 +82,7 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
                 histo = hists.FindObject(histoOptions.plotName+"_"+group.name)
                 sample_name = histo.GetName().split("_")[1]
                 integral += histo.Integral()
-                correction = 1.+(totalData-totalMC)/integral
+                correction = 1.+(totalData-totalMC)/(integral+1E-6)
                 print "I'm correcting ",sample_name," by a factor ",correction
                 histo.Scale(correction)
     
@@ -125,11 +119,17 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
             groupIntegral = histo.Integral()
             leg.AddEntry(histo,group.latexName+" (%s)"%str(round(groupIntegral,1)),"f")
     
-    ##
+    ## set x and y plot label
     stack.Draw("goff")
     
     stack.GetXaxis().SetTitle(histoOptions.xTitle)
     stack.GetYaxis().SetTitle(histoOptions.yTitle)
+    
+    ## if we are blinded, set dataPlot to zero
+    if histoOptions.blinded:
+        dataPlot.Reset()
+    
+    ## return objects
     return stack,dataPlot,signalPlot
 
 ## create the TLegend
