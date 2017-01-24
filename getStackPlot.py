@@ -113,7 +113,7 @@ def getStackWithDataOverlayAndLegend(leg, datasets, groups, histoOptions):
         print "### Total Signal: "+printYield(signalPlot)+" ###"
     
     ## fill legend
-    for group in groups:
+    for group in reversed(groups):
         if not group.type is "data":
             histo = hists.FindObject(histoOptions.plotName+"_"+group.name)
             groupIntegral = histo.Integral()
