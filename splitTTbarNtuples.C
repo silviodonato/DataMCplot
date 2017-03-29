@@ -14,13 +14,13 @@ void splitTTbarNtuples(){
     char ttbarPlusCCbarS[] = "ttCls >= 41 && ttCls<=45";
     char ttbarOtherS[] = "1";
     
-    char fileName_TT[] = "Jan16/Jan6__TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root";
+    char fileName_TT[] = "Mar27/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root";
     
-    char fileName_TTPlusB[] = "Jan16/Jan6__TT_PlusB.root";
-    char fileName_TTPlusBBbar[] = "Jan16/Jan6__TT_PlusBBbar.root";
-    char fileName_TTPlus2B[] = "Jan16/Jan6__TT_Plus2B.root";
-    char fileName_TTPlusCCbar[] = "Jan16/Jan6__TT_PlusCCbar.root";
-    char fileName_TTOther[] = "Jan16/Jan6__TT_Other.root";
+    char fileName_TTPlusB[] = "Mar27/TT_PlusB.root";
+    char fileName_TTPlusBBbar[] = "Mar27/TT_PlusBBbar.root";
+    char fileName_TTPlus2B[] = "Mar27/TT_Plus2B.root";
+    char fileName_TTPlusCCbar[] = "Mar27/TT_PlusCCbar.root";
+    char fileName_TTOther[] = "Mar27/TT_Other.root";
     
     auto file_TT            = new TFile(fileName_TT);
     auto file_TTPlusB       = new TFile(fileName_TTPlusB,"recreate");
