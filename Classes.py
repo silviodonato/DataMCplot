@@ -13,6 +13,7 @@ class DatasetClass(object):
         self.tree = self.tfile.Get("tree")
         print "Getting tree from ",self.fileName #," id=",id(self.tree)
         assert(type(self.tree)==ROOT.TTree)
+        assert(self.tree.GetEntries()>0)
     def closeFile(self):
         self.tfile.Close()
 
