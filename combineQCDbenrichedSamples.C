@@ -38,10 +38,6 @@ void combineQCDbenrichedSamples(){
         auto fileBGenFilter_ = new TFile(fileBGenFilter);
         auto fileBEnriched_ = new TFile(fileBEnriched);
 
-        auto fileoutNoB = new TFile(outNoB,"recreate");
-        auto fileoutBGenFilter = new TFile(outBGenFilter,"recreate");
-        auto fileoutBEnriched = new TFile(outBEnriched,"recreate");
-
         auto treeInclusive = (TTree*) fileInclusive_->Get("tree");
         auto treeBGenFilter = (TTree*) fileBGenFilter_->Get("tree");
         auto treeBEnriched = (TTree*) fileBEnriched_->Get("tree");
@@ -49,37 +45,43 @@ void combineQCDbenrichedSamples(){
         auto countInclusive = (TH1F*) fileInclusive_->Get("CountWeighted");
 
         //NoB file
+        auto fileoutNoB = new TFile(outNoB,"recreate");
         fileoutNoB->cd();
         TTree* outtreeNoB = treeInclusive->CopyTree(NoBS);
         treeInclusive->Write();
-        countInclusive->Write();
-
+        outtreeNoB->Write();
+        float count = countInclusive->GetBinContent(1);
+        fileoutNoB->Close();
+        
         //BGenFilter file
+        auto fileoutBGenFilter = new TFile(outBGenFilter,"recreate");
         fileoutBGenFilter->cd();
         TTree* outtreeBGenFilter = treeInclusive->CopyTree(BGenFilterS);
         stat_increase = 1.*treeBGenFilter->GetEntries()/outtreeBGenFilter->GetEntries();
         list = new TList();
         list->Add(treeBGenFilter);
         outtreeBGenFilter->Merge(list);
-        treeInclusive->Write();
-        countInclusive->SetBinContent(1,countInclusive->GetBinContent(1)*(1.+stat_increase));
+        outtreeBGenFilter->Write();
+        countInclusive->SetBinContent(1,count*(1.+stat_increase));
         countInclusive->Write();
-
+        fileoutBGenFilter->Close();
+        
         //BEnriched file
+        auto fileoutBEnriched = new TFile(outBEnriched,"recreate");
         fileoutBEnriched->cd();
         TTree* outtreeBEnriched = treeInclusive->CopyTree(BEnrichedS);
         stat_increase = 1.*treeBEnriched->GetEntries()/outtreeBEnriched->GetEntries();
         list = new TList();
         list->Add(treeBEnriched);
         outtreeBEnriched->Merge(list);
-        treeInclusive->Write();
-        countInclusive->SetBinContent(1,countInclusive->GetBinContent(1)*(1.+stat_increase));
+        outtreeBEnriched->Write();
+        countInclusive->SetBinContent(1,count*(1.+stat_increase));
         countInclusive->Write();
-
-        fileoutBGenFilter->Close();
+        fileoutBEnriched->Close();
+        
+        fileBEnriched_->Close();
         fileInclusive_->Close();
         fileBGenFilter_->Close();
-        fileBEnriched_->Close();
         }
     
 }
