@@ -48,7 +48,7 @@ void combineQCDbenrichedSamples(){
         auto fileoutNoB = new TFile(outNoB,"recreate");
         fileoutNoB->cd();
         TTree* outtreeNoB = treeInclusive->CopyTree(NoBS);
-        treeInclusive->Write();
+        countInclusive->Write();
         outtreeNoB->Write();
         float count = countInclusive->GetBinContent(1);
         fileoutNoB->Close();
